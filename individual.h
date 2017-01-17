@@ -29,6 +29,9 @@ iterator root_individual(Individual i);
 void delete_individual(Individual i);
 
 //Troca as subtrees dos individuos i1 e i2, com raizes r1 e r2, respectivamente
-void swap(Individual i1, iterator r1, Indivual i2, iterator r2);
+void swap_subtree(Individual i1, iterator r1, Indivual i2, iterator r2);
+
+//Imprime o individuo na tela
+void print_individual(Individual i);
 
 #endif

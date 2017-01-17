@@ -55,9 +55,11 @@ iterator left_child(Heap h, iterator x);
 //Retorna um iterator para o filho a direita
 iterator right_child(Heap h, iterator x);
 
-//Insere o caractere c como filho do nó i, 
-//à esquerda se lr = 0 ou à direita se lr = 1
-void heap_insert(Heap h, char c, iterator i, int lr);
+//Retorna a altura de um nó;
+int height_iterator(iterator x);
+
+//Insere o caractere c no nó i
+void heap_insert(Heap h, char c, iterator i);
 
 //Insere uma subtree do heap sub, com raiz em sub_root, no nó i do heap h
 //OBS : Sobreescreve caracteres já adcionados.

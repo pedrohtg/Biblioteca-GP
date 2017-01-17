@@ -65,7 +65,7 @@ int get_fitness(Individual i){
 
 //Insere um novo nó(função ou variavel) no individuo
 void insert_node(Individual i, char c, iterator pos){
-	heap_insert(i->tree, c, pos, 0);
+	heap_insert(i->tree, c, pos);
 }
 
 //Verifica se o no é valido/existe no invidiuo
@@ -107,10 +107,28 @@ void delete_individual(Individual i){
 }
 
 //Troca as subtrees dos individuos i1 e i2, com raizes r1 e r2, respectivamente
-void swap(Individual i1, iterator r1, Indivual i2, iterator r2){
+void swap_subtree(Individual i1, iterator r1, Indivual i2, iterator r2){
 	Heap aux = get_subtree(i1->tree, r1);
 	heap_insert_subtree(i1->tree, i2->tree, r1, r2);
 	heap_insert_subtree(i2->tree, aux, r2, 0);
 
 	delete_heap(aux);
+}
+
+//Imprime o individuo na tela
+//Formato : (Nó pai)valor do nó atual 
+void print_individual(Individual i){
+	int h = 0;
+	if(!heap_empty(i->tree)){
+		for(iterator x = begin(i->tree); x != end(i->tree); x = next(x)){
+			printf("(%d)%c ", parent(x), value(x));
+			if(height_iterator(x) > h || h == 0){
+				printf("\n");
+				h++;
+			}
+		}
+	}
+	else{
+		printf("-- Individuo Nulo --\n");
+	}
 }

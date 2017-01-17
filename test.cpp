@@ -35,10 +35,10 @@ int main()
   Heap e = new_heap();
   int i;
   for(i = 0; i < 64; i++){
-    heap_insert(h,'0'+i, i, i%2);
+    heap_insert(h,'0'+i, i);
   }
   for(i = 0; i < 26; i++){
-    heap_insert(e,'A'+i, i, (i+1)%2);
+    heap_insert(e,'A'+i, i);
   }
 
   std::vector<char> H;

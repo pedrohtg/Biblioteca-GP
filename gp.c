@@ -60,7 +60,7 @@ void crossover(Individual i1, Individual i2){
 	}
 
 
-	swap(i1, r1, i2 ,r2);
+	swap_subtree(i1, r1, i2 ,r2);
 }
 
 void mutation(Individual i);
