@@ -154,6 +154,7 @@ void heap_insert(Heap h, char c, iterator i){
 void aux_subtree(Heap h, Heap sub, int* count, iterator h_actual, iterator sub_actual){
 	if((*count) == heap_size(sub)) return ;
 	else{
+		if(!use(h,h_actual)) h->size++;
 		h->array[h_actual] = sub->array[sub_actual];
 		(*count)++;
 
@@ -183,6 +184,8 @@ void heap_insert_subtree(Heap h, Heap sub, iterator i, iterator sub_root){
 	if(i_height + sub->height + 1 > max_height){
 		heap_resize(h,pow(2, i_height + sub->height + 1));
 	}
+
+	heap_remove(h, i);
 
 	aux_subtree(h, sub,p_count,i,sub_root);
 }

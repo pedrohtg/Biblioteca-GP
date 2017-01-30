@@ -6,6 +6,9 @@ typedef struct TrainingStruct* Training;
 //Cria um novo objeto para Training;
 Training new_training();
 
+//Apaga o objeto de Training
+void delete_training(Training t);
+
 //Configura os operadorse validos;
 void set_operations(int number, ...);
 
@@ -24,6 +27,12 @@ int is_simple(char c);
 
 //Retorna uma operação aleatória da Entidade
 char random_operation(Training t);
+
+//Retorna uma operação SIMPLES aleatória da Entidade
+char random_simple_operation(Training t);
+
+//Retorna uma operação COMPOSTA aleatória da Entidade
+char random_composite_operation(Training t);
 
 //Retorna uma varivel/constante aleatória da Entidade
 char random_variable(Training t);

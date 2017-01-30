@@ -63,9 +63,19 @@ int get_fitness(Individual i){
 	return i->fitness;
 }
 
+//Retorna a arvore do Individuo i
+Heap get_tree(Individual i){
+	return i->tree;
+}
+
 //Insere um novo nó(função ou variavel) no individuo
 void insert_node(Individual i, char c, iterator pos){
 	heap_insert(i->tree, c, pos);
+}
+
+//Insere uma subarvore no nó pos do individuo
+void insert_subtree(Individual i, Heap h, iterator pos){
+	heap_insert_subtree(i->tree, h, pos, 0);
 }
 
 //Verifica se o no é valido/existe no invidiuo
@@ -73,7 +83,12 @@ int valid_node(Individual i, iterator n){
 	return use(i->tree,n);
 }
 
-//Retorna um iterator para um nó
+//Retorna o valor do nó n no invidiuo
+char node_value(Individual i, iterator n){
+	return value(i->tree,n);
+}
+
+//Retorna um iterator para um nó aleatório
 iterator random_node(Individual i){
 	srand(time(NULL));
 	

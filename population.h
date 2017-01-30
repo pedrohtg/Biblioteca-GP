@@ -7,6 +7,9 @@ typedef struct IndStruct* Indvidual;
 //Cria uma nova população com tamanho max. size
 Population new_population(int size);
 
+//Inicializa uma população -> Adiciona novos individuos até sua capacidade max
+void initialize_population(Population p, int ind_max_height, Training t);
+
 //Retorna o melhor individuo da População p
 Individual best(Population p);
 

@@ -10,7 +10,7 @@ struct PopStruct{
 	int size;
 };
 
-//Cria uma nova população com tamanho max. size
+//Cria uma nova população com tamanho max. = size
 Population new_population(int size){
 	Popuplation p = malloc(sizeof(struct PopStruct));
 	p->max_size = size;
@@ -20,6 +20,15 @@ Population new_population(int size){
 	p->size = 0;
 
 	return p;	
+}
+
+//Inicializa uma população -> Adiciona novos individuos até sua capacidade max
+void initialize_population(Population p, int ind_max_height, Training t){
+	int i;
+	for(i = 0; i < p->max_size; i++){
+		p->array[i] = new_individual(ind_max_height,t);
+	}
+	p->size = p->max_size;
 }
 
 //Retorna o melhor individuo da População p
