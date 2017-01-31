@@ -1,29 +1,29 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include "char_heap.h"
+#include "heap.h"
 
 #define log2(a) log(a)/log(2)
 #define null -1
 
 typedef struct HeapStruct{
-	char* array;
+	int* array;
 	int size;
 	int height;
 	int capacity;
 }HS;
 
-char* array(Heap h){
+int* array(Heap h){
 	return h->array;
 }
 
-//Cria um novo Heap de CHAR
+//Cria um novo Heap de INT
 Heap new_heap(){
 	Heap h = (Heap)malloc(sizeof(HS));
 	h->size = 0;
 	h->height = 0;
 	h->capacity = heap_init_capacity;
-	char *v = (char*)calloc(h->capacity, sizeof(char));
+	int *v = (int*)calloc(h->capacity, sizeof(int));
 	h->array = v;
 
 	return h;
@@ -42,7 +42,7 @@ int heap_size(Heap h){
 //Aumenta o tamanho máximo do heap
 void heap_resize(Heap h, int new_capacity){
 	if(new_capacity > h->capacity){
-		char *v = (char*)calloc(new_capacity, sizeof(char));
+		int *v = (int*)calloc(new_capacity, sizeof(int));
 		int i;
 		for(i = 0; i < h->capacity; i++){
 			v[i] = h->array[i];
@@ -94,7 +94,7 @@ int valid(Heap h, iterator i){
 }
 
 //Retorna o valor do iterator i
-char value(Heap h, iterator i){
+int value(Heap h, iterator i){
 	return h->array[i];
 }
 
@@ -130,15 +130,15 @@ int height_iterator(iterator x){
 	return floor(log2(x+1));
 }
 
-//Insere o caractere c no nó i
-//OBS : Sobreescreve caracteres já adcionados.
-void heap_insert(Heap h, char c, iterator i){
+//Insere o inteiro v no nó i
+//OBS : Sobreescreve numeros já adcionados.
+void heap_insert(Heap h, int v, iterator i){
 	if(valid(h,i)){
 		if(use(h,i)){
-			h->array[i] = c;
+			h->array[i] = v;
 		}
 		else{
-			h->array[i] = c;
+			h->array[i] = v;
 			h->size++;
 
 			//Atualiza a altura do heap
@@ -222,7 +222,7 @@ void heap_swap(Heap h, Heap g){
 	heap_resize(h,lg_capacaity);
 	heap_resize(g,lg_capacaity);
 
-	char *aux = h->array;
+	int *aux = h->array;
 	int s = h->size;
 	int ht = h->height;
 
@@ -252,7 +252,7 @@ void heap_copy(Heap h, Heap g){
 	heap_resize(h,lg_capacaity);
 	heap_resize(g,lg_capacaity);
 
-	char *v = (char*)calloc(lg_capacaity, sizeof(char));
+	int *v = (int*)calloc(lg_capacaity, sizeof(int));
 	int i;
 	for(i = 0; i < h->capacity; i++){
 		v[i] = h->array[i];

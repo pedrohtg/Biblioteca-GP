@@ -14,7 +14,7 @@ void initialize_population(Population p, int ind_max_height, Training t);
 Individual best(Population p);
 
 //Verifica se o individual(identificado pelo id) se encontra na População
-int find_individual(Population p, int id);
+int exist_individual(Population p, int id);
 
 //Retorna o individuo identificado pelo id, caso exista
 Individual get_individual(Population p, int id);

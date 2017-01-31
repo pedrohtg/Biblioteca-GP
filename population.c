@@ -45,13 +45,13 @@ Individual best(Population p){
 }
 
 //Verifica se o individual(identificado pelo id) se encontra na População
-int find_individual(Population p, int id){
+int exist_individual(Population p, int id){
 	return id >= 0 && id <= p->size;
 }
 
 //Retorna o individuo identificado pelo id, caso exista
 Individual get_individual(Population p, int id){
-	if(find_individual(p,id)) return p->array[id];
+	if(exist_individual(p,id)) return p->array[id];
 	else return NULL;
 }
 

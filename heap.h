@@ -1,5 +1,5 @@
-#ifndef C_HEAP_H_
-#define C_HEAP_H_
+#ifndef HEAP_H_
+#define HEAP_H_
 
 typedef struct HeapStruct* Heap;
 typedef int iterator;
@@ -41,7 +41,7 @@ iterator prev(Heap h, iterator i);
 int valid(Heap h, iterator i);
 
 //Retorna o valor do iterator i;
-char value(Heap h, iterator i);
+int value(Heap h, iterator i);
 
 //Retorna se o iterator i é um nó usado
 int use(Heap h, iterator i);
@@ -58,8 +58,8 @@ iterator right_child(Heap h, iterator x);
 //Retorna a altura de um nó;
 int height_iterator(iterator x);
 
-//Insere o caractere c no nó i
-void heap_insert(Heap h, char c, iterator i);
+//Insere o inteiro v no nó i
+void heap_insert(Heap h, int v, iterator i);
 
 //Insere uma subtree do heap sub, com raiz em sub_root, no nó i do heap h
 //OBS : Sobreescreve caracteres já adcionados.
@@ -85,6 +85,6 @@ void delete_heap(Heap h);
 
 
 //DEBUG ONLY
-char* array(Heap h);
+int* array(Heap h);
 
 #endif

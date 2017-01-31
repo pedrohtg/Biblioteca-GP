@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
-#include "char_heap.h"
+#include "int_heap.h"
 #include "individual.h"
 #include "training.h"
 
@@ -22,7 +22,7 @@ void random_init(Training t, Individual i, int max_height, int actual_height, it
 
 		if(roll <= prob) insert_node(i,random_variable(t), pos);
 		else{
-			char op = random_operation(t);
+			int op = random_operation(t);
 			if(is_simple(op)) {
 				insert_node(i, op, pos);
 				random_init(t,max_height,actual_height+1, left_child(i->tree,pos));
@@ -69,8 +69,8 @@ Heap get_tree(Individual i){
 }
 
 //Insere um novo nó(função ou variavel) no individuo
-void insert_node(Individual i, char c, iterator pos){
-	heap_insert(i->tree, c, pos);
+void insert_node(Individual i, int v, iterator pos){
+	heap_insert(i->tree, v, pos);
 }
 
 //Insere uma subarvore no nó pos do individuo
@@ -84,7 +84,7 @@ int valid_node(Individual i, iterator n){
 }
 
 //Retorna o valor do nó n no invidiuo
-char node_value(Individual i, iterator n){
+int node_value(Individual i, iterator n){
 	return value(i->tree,n);
 }
 

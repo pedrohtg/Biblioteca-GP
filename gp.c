@@ -128,7 +128,7 @@ void mutation(GP gp, Individual i){
 		int i = 0;
 		for(;i < gp->mutation_size; i++){
 			iterator chosen = random_node(i);
-			char chosen_value  = node_value(i,chosen);
+			int chosen_value  = node_value(i,chosen);
 
 			if(is_operation(chosen_value)){
 				if(is_simple(chosen_value)){

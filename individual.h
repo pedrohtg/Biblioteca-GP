@@ -2,10 +2,11 @@
 #define INDIVIDUAL_H_
 
 typedef struct IndStruct* Indvidual;
+typedef struct TrainingStruct* Training;
 typedef int iterator;
 
 //Cria um novo Indivuo
-Individual new_individual();
+Individual new_individual(int max_height, Training t);
 
 //Altera o fitness do individuo
 void set_fitness(Individual i, double fit);
@@ -17,7 +18,7 @@ int get_fitness(Individual i);
 Heap get_tree(Individual i);
 
 //Insere um novo nó(função ou variavel) no individuo
-void insert_node(Individual i, char c, iterator pos);
+void insert_node(Individual i, int v, iterator pos);
 
 //Insere uma subarvore no nó pos do individuo
 void insert_subtree(Individual i, Heap h, iterator pos);
@@ -26,7 +27,7 @@ void insert_subtree(Individual i, Heap h, iterator pos);
 int valid_node(Individual i, iterator n);
 
 //Retorna o valor do nó n no invidiuo
-char node_value(Individual i, iterator n);
+int node_value(Individual i, iterator n);
 
 //Retorna um iterator para um nó aleatório
 iterator random_node(Individual i);

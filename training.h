@@ -4,38 +4,35 @@
 typedef struct TrainingStruct* Training;
 
 //Cria um novo objeto para Training;
-Training new_training();
+Training new_training(int input_number);
 
 //Apaga o objeto de Training
 void delete_training(Training t);
 
 //Configura os operadorse validos;
-void set_operations(int number, ...);
-
-//Configura as variaveis(inputs)
-void set_inputs(int number, ...);
+void set_operations(Training t, int number, ...);
 
 //Inicializa a entidade com os valores do dataset
 void initialize_data(char* filename, Training t);
 
-//Determina se tal Representante c, é uma operação ou variavel/constante
-int is_operation(char c);
+//Determina se tal Representante k, é uma operação ou variavel/constante
+int is_operation(int k);
 
-//Determina se tal representante c é uma operação simples(atua sobre uma variavel) ou composta(atua sobre duas variaveis)
-//Obs: Assume que c representa uma operação
-int is_simple(char c);
+//Determina se tal representante k é uma operação simples(atua sobre uma variavel) ou composta(atua sobre duas variaveis)
+//Obs: Assume que k representa uma operação
+int is_simple(int k);
 
 //Retorna uma operação aleatória da Entidade
-char random_operation(Training t);
+int random_operation(Training t);
 
 //Retorna uma operação SIMPLES aleatória da Entidade
-char random_simple_operation(Training t);
+int random_simple_operation(Training t);
 
 //Retorna uma operação COMPOSTA aleatória da Entidade
-char random_composite_operation(Training t);
+int random_composite_operation(Training t);
 
 //Retorna uma varivel/constante aleatória da Entidade
-char random_variable(Training t);
+int random_variable(Training t);
 
 //Retorna o valor de um input em uma amostra/caso do dataset
 double input_value(char in, Training t, int sample);
