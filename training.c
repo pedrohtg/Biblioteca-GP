@@ -20,6 +20,8 @@ double mod(double a);
 // Auxiliar functions -----
 //int get_input_position(char in, Training t);
 int convert_operation_simbol(char c);
+void (*fun)(double) op_func_simple(int op);
+void (*fun)(double, double) op_func_composite(int op);
 int op_pos(int op);
 // ------------------------
 // ------------------------
@@ -41,11 +43,22 @@ Training new_training(int input_number){
 	int i;
 	for(i = 0; i < 4; i++) t->operation[i] = 1;
 	t->op_number = 4;
+	t->data_size = 0;
 
 	return t;
 }
 
-//Configura os operadorse validos;
+//Apaga um objeto de Training;
+void delete_training(Training t){
+	int i;
+	for(i = 0; i < t->data_size; i++){
+		free(t->data[i]);
+	}
+	free(t->data);
+	free(t);
+}
+
+//Configura os operadores validos;
 void set_operations(Training t, int number, ...){
 	int i,pos;
 	char c;
@@ -65,10 +78,44 @@ void set_operations(Training t, int number, ...){
 }
 
 //Inicializa a entidade com os valores do dataset
-void initialize_data(char* filename, Training t);
+void initialize_data(char* filename, Training t){
+	FILE *fp = fopen(filename, "r");
+
+	if(fp == NULL){
+		printf("Erro: O arquivo não pode ser aberto. Verifique se o nome digitado está correto.\n");
+		return;
+	}
+
+	int n, m;
+	fscanf(fp, "%d %d",n,m);
+	if(n != t->in_number){
+		printf("Erro: O número de váriaveis do arquivo é diferente do configurado no programa.\n");
+		return;
+	}
+
+	int i,j;
+
+	t->data_size = m;
+	t->data = malloc(m*sizeof(double*));
+	for(i = 0; i < m; i++){
+		t->data[i] = malloc((n+1)*sizeof(double));
+	}
+
+	for(i = 0; i < m; i++){
+		for(j = 0; j < n+1; j++){
+			fscanf(fp,"%d", t->data[i][j]);
+		}
+	}
+
+	fclose(fp);
+}
 
 //Determina se tal Representante k, é uma operação ou variavel/constante
-int is_operation(int k);
+//OBS.: Se k é uma operação então assume-se que é válida
+int is_operation(int k){
+	if(-7 <= k && k <= - 1) return 1;
+	else return 0;
+}
 
 //Determina se tal representante k é uma operação simples(atua sobre uma variavel) ou composta(atua sobre duas variaveis)
 //Obs: Assume que k representa uma operação
@@ -96,13 +143,22 @@ int random_variable(Training t){
 }
 
 //Retorna o valor de um input em uma amostra/caso do dataset
-double input_value(int in, Training t, int sample);
+//Assume que in é uma variável válida
+double input_value(int in, Training t, int sample){
+	return t->data[sample][in];
+}
 
 //Retorna o valor da operação simples para o dado input
-double simple_value(int op, double input);
+double simple_value(int op, double input){
+	void (*fun)(double) func = op_func_simple(op);
+	return func(input);
+}
 
 //Retorna o valor da operação composta para o dado input
-double composite_value(int op, double input1, double input2);
+double composite_value(int op, double input1, double input2){
+	void (*fun)(double,double) func = op_func_composite(op);
+	return func(input1,input2);
+}
 
 //------------------------------------------------------------
 //Private section --------------------------------------------
@@ -131,6 +187,10 @@ double exp(double a, double b){
 
 double sqr(double a){
 	return sqrt(a);
+}
+
+double mod(double a){
+	return fabs(a);
 }
 // ------------------------
 
@@ -172,6 +232,37 @@ char convert_operation_simbol(int op){
 			break;
 		default :
 			return '.';
+	}
+}
+
+void (*fun)(double) op_func_simple(int op){
+	switch(op){
+		case -5: 
+			return sqr;
+			break;
+		case -7: 
+			return mod;
+			break;
+	}
+}
+
+void (*fun)(double, double) op_func_composite(int op){
+	switch(op){
+		case -1: 
+			return add;
+			break;
+		case -2: 
+			return sub;
+			break;
+		case -3: 
+			return mux;
+			break;
+		case -4: 
+			return div;
+			break;
+		case -6: 
+			return exp;
+			break;
 	}
 }
 

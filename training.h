@@ -13,6 +13,9 @@ void delete_training(Training t);
 void set_operations(Training t, int number, ...);
 
 //Inicializa a entidade com os valores do dataset
+//O arquivo deve seguir um padrão:
+// => A 1ª linha do arquivo contem 2 inteiros, n e m, onde n representa o número de váriaveis e m o número de instâncias
+// => As próximas m linhas contem (n + 1) reais onde os n primeiros são os valores das váriaveis e o n+1 é o valor da função dadas as entradas
 void initialize_data(char* filename, Training t);
 
 //Determina se tal Representante k, é uma operação ou variavel/constante
