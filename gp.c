@@ -83,15 +83,12 @@ Population tournament(Population p, int rounds, int round_size){
 	best = chosen_id;
 	best_fit = get_fitness(get_individual(p,chosen_id));
 
-	for(int i = 0; i < rounds; i++){
+	for(i = 0; i < rounds; i++){
 
 		for(k = 0; k < round_size; k++){
 			chosen = rand() % size;
 			fit = get_fitness(get_individual(p,chosen));
-			//TODO ->
-			//Which is Better Fitness - Implemented in Population(???)
-			// ------
-			if(fit == which_is_better(fit,best_fit)){
+			if(fit >= best_fit){
 				best = chosen_id;
 				best_fit = fit;
 			}

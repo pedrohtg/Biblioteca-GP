@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <math.h>
 #include "heap.h"
+#include "gp.h"
 
 #define log2(a) log(a)/log(2)
 #define null -1
@@ -18,11 +19,11 @@ int* array(Heap h){
 }
 
 //Cria um novo Heap de INT
-Heap new_heap(){
+Heap new_heap(int heap_capacity){
 	Heap h = (Heap)malloc(sizeof(HS));
 	h->size = 0;
 	h->height = 0;
-	h->capacity = heap_init_capacity;
+	h->capacity = heap_capacity;
 	int *v = (int*)calloc(h->capacity, sizeof(int));
 	h->array = v;
 
@@ -59,6 +60,12 @@ iterator heap_root(Heap h){
 	return 0;
 }
 
+//Retorna um iterator para antes de begin(raiz do heap)
+//Obs: não é um iterator válido. Usado para percorrer o heap de 'trás pra frente'
+iterator pre_begin(Heap h){
+	return -1;
+}
+
 //Retorna um iterator para begin(raiz do heap)
 iterator begin(Heap h){
 	if(!heap_empty(h)) return 0;
@@ -82,12 +89,12 @@ iterator next(Heap h, iterator i){
 //Retorna um iterator para o anterior de i
 iterator prev(Heap h, iterator i){
 	i--;
-	while(!use(h,i) && i > 0) i--;
+	while(!use(h,i) && i >= 0) i--;
 
 	return i;
 }
 
-//Retorna se o iterator i é um nó existente
+//Retorna se o iterator i é válido, ou seja, se é possível acessá-lo
 int valid(Heap h, iterator i){
 	if(i >= 0 && i < h->capacity) return 1;
 	else return 0; 
@@ -98,7 +105,7 @@ int value(Heap h, iterator i){
 	return h->array[i];
 }
 
-//Retorna se o iterator i é usado
+//Retorna se o iterator i é um nó existente, ou seja, se é usado
 int use(Heap h, iterator i){
 	if(valid(h,i))
 		return h->array[i] != 0;
@@ -114,14 +121,14 @@ iterator parent(iterator x){
 //Retorna um iterator para o filho a esquerda
 iterator left_child(Heap h, iterator x){
 	int l = 2*x + 1;
-	if(l > h->capacity) return null;
+	if(l >= h->capacity) return null;
 	else return l; 
 }
 
 //Retorna um iterator para o filho a direita
 iterator right_child(Heap h, iterator x){
 	int r = 2*x + 2;
-	if(r > h->capacity) return null;
+	if(r >= h->capacity) return null;
 	else return r;
 }
 
@@ -137,7 +144,7 @@ void heap_insert(Heap h, int v, iterator i){
 		if(use(h,i)){
 			h->array[i] = v;
 		}
-		else{
+		else if(i == heap_root(h) || use(parent(i))){
 			h->array[i] = v;
 			h->size++;
 
@@ -151,43 +158,38 @@ void heap_insert(Heap h, int v, iterator i){
 }
 
 //Função auxiliar, para a inserção de uma subárvore sub em um heap h
-void aux_subtree(Heap h, Heap sub, int* count, iterator h_actual, iterator sub_actual){
-	if((*count) == heap_size(sub)) return ;
-	else{
-		if(!use(h,h_actual)) h->size++;
-		h->array[h_actual] = sub->array[sub_actual];
-		(*count)++;
+void aux_subtree(Heap h, Heap sub, iterator h_actual, iterator sub_actual){
+	if(!use(h,h_actual)) h->size++;
+	h->array[h_actual] = sub->array[sub_actual];
+	(*count)++;
 
-		//Atualiza a altura do heap
-		int actual_height = height_iterator(h_actual);
-		if(h->height < actual_height){
-			h->height = actual_height;
-		}
-
-		iterator left_sub = left_child(sub,sub_actual);
-		iterator right_sub = right_child(sub,sub_actual);
-
-		if(use(sub,left_sub)) aux_subtree(h,sub,count,left_child(h,h_actual),left_sub);
-		if(use(sub,right_sub)) aux_subtree(h,sub,count,right_child(h,h_actual),right_sub);
+	//Atualiza a altura do heap
+	int actual_height = height_iterator(h_actual);
+	if(h->height < actual_height){
+		h->height = actual_height;
 	}
+
+	iterator left_sub = left_child(sub,sub_actual);
+	iterator right_sub = right_child(sub,sub_actual);
+
+	if(use(sub,left_sub)) aux_subtree(h,sub,count,left_child(h,h_actual),left_sub);
+	if(use(sub,right_sub)) aux_subtree(h,sub,count,right_child(h,h_actual),right_sub);
 }
 
-//Insere uma subtree do heap sub, com raiz em sub_root, no nó i do heap h
-//OBS : Sobreescreve caracteres já adcionados.
+//Insere uma subtree de sub, com raiz em sub_root, no nó i do heap h
+//OBS : A subarvore de i é removida.
 void heap_insert_subtree(Heap h, Heap sub, iterator i, iterator sub_root){
-	int count = 0;
-	int *p_count = &count;
-
 	int i_height = height_iterator(i);
+	int sub_height = sub->height - height_iterator(sub_root) + 1;	
 	int max_height = log2(h->capacity + 1) - 1;
 
-	if(i_height + sub->height + 1 > max_height){
-		heap_resize(h,pow(2, i_height + sub->height + 1));
+	if(i_height + sub_height - 1 > max_height){
+		heap_resize(h,pow(2, i_height + sub_height));
 	}
 
 	heap_remove(h, i);
 
-	aux_subtree(h, sub,p_count,i,sub_root);
+	aux_subtree(h, sub, i, sub_root);
 }
 
 //Retorna a subtree de h com raiz r
@@ -199,7 +201,6 @@ Heap get_subtree(Heap h, iterator r){
 
 	return sub;
 }
-
 
 //Remove o o nó e toda a sua subarvore
 void heap_remove(Heap h, iterator i){
@@ -217,14 +218,10 @@ void heap_remove(Heap h, iterator i){
 
 //Troca o conteúdo entre os heap h e g
 void heap_swap(Heap h, Heap g){
-	int lg_capacaity = h->capacity > g->capacity ? h->capacity : g->capacity;
-
-	heap_resize(h,lg_capacaity);
-	heap_resize(g,lg_capacaity);
-
 	int *aux = h->array;
 	int s = h->size;
 	int ht = h->height;
+	int cp = h->capacity;
 
 	h->array = g->array;
 	g->array = aux;
@@ -234,6 +231,9 @@ void heap_swap(Heap h, Heap g){
 
 	h->height = g->height;
 	g->height = ht;
+
+	h->capacity = g->capacity;
+	g->capacity = cp;
 }
 
 //Apaga o conteúdo do Heap h
@@ -247,12 +247,7 @@ void clear_heap(Heap h){
 
 //Apaga o conteúdo de g e copia h para g
 void heap_copy(Heap h, Heap g){
-	int lg_capacaity = h->capacity > g->capacity ? h->capacity : g->capacity;
-
-	heap_resize(h,lg_capacaity);
-	heap_resize(g,lg_capacaity);
-
-	int *v = (int*)calloc(lg_capacaity, sizeof(int));
+	int *v = (int*)calloc(h->capacity, sizeof(int));
 	int i;
 	for(i = 0; i < h->capacity; i++){
 		v[i] = h->array[i];
@@ -262,6 +257,7 @@ void heap_copy(Heap h, Heap g){
 	g->array = v;
 	g->size = h->size;
 	g->height = h->height;
+	g->capacity = h->capacity;
 }
 
 //Deleta o Heap h
@@ -269,3 +265,7 @@ void delete_heap(Heap h){
 	free(h->array);
 	free(h);
 }
+
+
+
+

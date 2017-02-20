@@ -30,8 +30,8 @@ struct TrainingStruct{
 	int operation[TOTAL_OP_NUMBER];	// Representa se as operações {+, -, *, /, raiz quadrada(√), exponencial(^), modulo(#)} são validas, respectivamente;
 	int op_number;		// Numero de operações ativadas. 
 	int in_number;		// Numero de inputs; As variaveis são representadas de 1 até in_number.
-	double** data;
-	int data_size;
+	double** data;		// Matriz que armazena os valores das instancias de treinamento
+	int data_size;		// Numero de instancias de treinameto
 };
 
 //Cria um novo objeto para Training;
@@ -65,13 +65,16 @@ void set_operations(Training t, int number, ...){
 	va_list v;
 	va_start(v,number);
 
+	t->op_number = 0;
 	for(i = 0; i < TOTAL_OP_NUMBER; i++) t->operation[i] = 0;
 
 	for(i = 0; i < number; i++){
 		c = va_arg(v,char);
-		pos = convert_operation_simbol(c);
-		if(t->operation[pos] == 0) t->op_number++;
-		t->operation[pos] = 1;
+		pos = convert_simbol_operation(c);
+		if(pos >= 0 && pos < TOTAL_OP_NUMBER){
+			if(t->operation[pos] == 0) t->op_number++;
+			t->operation[pos] = 1;
+		}
 	}
 
 	va_end(v);
@@ -82,14 +85,16 @@ void initialize_data(char* filename, Training t){
 	FILE *fp = fopen(filename, "r");
 
 	if(fp == NULL){
-		printf("Erro: O arquivo não pode ser aberto. Verifique se o nome digitado está correto.\n");
+		printf("Error: File couldn't be open. Check if the name typed is correct.\n");
+		//printf("Erro: O arquivo não pode ser aberto. Verifique se o nome digitado está correto.\n");
 		return;
 	}
 
 	int n, m;
 	fscanf(fp, "%d %d",n,m);
 	if(n != t->in_number){
-		printf("Erro: O número de váriaveis do arquivo é diferente do configurado no programa.\n");
+		printf("Error: Incompatible number of variables in file and configured in program.\n");
+		//printf("Erro: O número de váriaveis do arquivo é diferente do configurado no programa.\n");
 		return;
 	}
 
@@ -132,6 +137,41 @@ int random_operation(Training t){
 	while(!t->operation[op]) op = rand() % TOTAL_OP_NUMBER;
 
 	return ((-1)*op - 1);
+}
+
+//Retorna uma operação SIMPLES aleatória da Entidade
+int random_simple_operation(Training t){
+	srand(time(NULL));
+	int coin = rand()%2;
+	int sq = convert_simbol_operation('√');
+	int md = convert_simbol_operation('#')
+	if(t->operation[sq] && coin) return ((-1)*sq - 1);
+	else if(t->operation[md]) return ((-1)*md - 1);
+	else if(t->operation[sq]) return ((-1)*sq - 1);
+	else{
+		printf("Error: No simple operation set in this Training.\n");
+		return random_operation(t);
+	}
+}
+
+//Retorna uma operação COMPOSTA aleatória da Entidade
+int random_composite_operation(Training t){
+	srand(time(NULL));
+	int sum = 0;
+	int i;
+	int pt = convert_simbol_operation('^');
+	for(i = 0; i < pt; i++) sum += t->operation[i];
+
+	if(sum == 0){
+		printf("Error: No composite operation set in this Training.\n");
+		return random_operation(t);
+	}
+	else{
+		int op = rand() % pt;
+		while(!t->operation[op]) op = rand() % pt;
+
+		return op;
+	}
 }
 
 //Retorna uma varivel/constante aleatória da Entidade
@@ -181,7 +221,7 @@ double div(double a, double b){
 	return a/b;
 }
 
-double exp(double a, double b){
+double pot(double a, double b){
 	return pow(a,b);
 }
 
@@ -235,6 +275,34 @@ char convert_operation_simbol(int op){
 	}
 }
 
+int convert_simbol_operation(char op){
+	switch(op){
+		case '+': 
+			return 0;
+			break;
+		case '-': 
+			return 1;
+			break;
+		case '*': 
+			return 2;
+			break;
+		case '/': 
+			return 3;
+			break;
+		case '√': 
+			return 4;
+			break;
+		case '^': 
+			return 5;
+			break;
+		case '#': 
+			return 6;
+			break;
+		default :
+			return 7;
+	}
+}
+
 void (*fun)(double) op_func_simple(int op){
 	switch(op){
 		case -5: 
@@ -261,7 +329,7 @@ void (*fun)(double, double) op_func_composite(int op){
 			return div;
 			break;
 		case -6: 
-			return exp;
+			return pot;
 			break;
 	}
 }

@@ -1,9 +1,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
+#include <math.h>
+#include <float.h>
 #include "int_heap.h"
 #include "individual.h"
 #include "training.h"
+
+#define INF DBL_MAX
 
 struct IndStruct{
 	Heap tree;
@@ -12,13 +16,15 @@ struct IndStruct{
 };
 
 void random_init(Training t, Individual i, int max_height, int actual_height, iterator pos){
+	if(!valid(i->tree, pos)) return ;
+
 	srand(time(NULL));
-	if(actual_height == max_height){
+	if(actual_height >= max_height){
 		insert_node(i,random_variable(t), pos);
 	}
 	else{
 		double roll = (double)rand() / (RAND_MAX + 1.0);
-		double prob = 1.0 / ( max_height - actual_height + 0.75);
+		double prob = 1.0 / ( max_height - actual_height + 0.3);
 
 		if(roll <= prob) insert_node(i,random_variable(t), pos);
 		else{
@@ -38,19 +44,18 @@ void random_init(Training t, Individual i, int max_height, int actual_height, it
 
 //Cria um novo Indivuo
 Individual new_individual(int max_height, Training t){
-	Heap h = new_heap();
+	Heap h = new_heap(pow(2,max_height + 1) - 1);
 
-	Individual o = malloc(sizeof(struct IndStruct));
-	o->tree = h;
-	o->id = 0;
-	o->fitness = 0;
-
+	Individual i = malloc(sizeof(struct IndStruct));
+	i->tree = h;
+	i->id = 0;
+	i->fitness = INF;
 
 	// random initialize heap
 	random_init(i,t, max_height, 0, 0);
 	//
 
-	return o;
+	return i;
 }
 
 //Altera o fitness do individuo
@@ -61,6 +66,32 @@ void set_fitness(Individual i, double fit){
 //Retorna o fitness do individuo
 int get_fitness(Individual i){
 	return i->fitness;
+}
+
+//Funcao auxiliar para avaliar o valor de um individuo
+double aux_avaliate(Heap h, int pos, Training t, int sample){
+	if(use(h,pos)){
+		int x = value(h,pos);
+		if(is_operation(x)){
+			if(is_simple(x)) {
+				double l_value = aux_avaliate(h,left_child(h,pos), t, sample);
+				return simple_value(x,l_value);
+			}
+			else {
+				double l_value = aux_avaliate(h, left_child(h,pos), t, sample);
+				double r_value = aux_avaliate(h, right_child(h,pos), t, sample);
+				return composite_value(x,l_value,r_value);
+			}
+		}
+		else{
+			return input_value(x,t,sample);
+		}
+	}
+}
+
+//Avalia o valor do individuo i para dada instancia 'sample'
+double avaliate_individual(Individual i, Training t, int sample){
+	return aux_avaliate(i->tree, heap_root(i->tree), t, sample);
 }
 
 //Retorna a arvore do Individuo i
@@ -79,13 +110,13 @@ void insert_subtree(Individual i, Heap h, iterator pos){
 }
 
 //Verifica se o no é valido/existe no invidiuo
-int valid_node(Individual i, iterator n){
-	return use(i->tree,n);
+int valid_node(Individual i, iterator pos){
+	return use(i->tree,pos);
 }
 
 //Retorna o valor do nó n no invidiuo
-int node_value(Individual i, iterator n){
-	return value(i->tree,n);
+int node_value(Individual i, iterator pos){
+	return value(i->tree,pos);
 }
 
 //Retorna um iterator para um nó aleatório
@@ -97,10 +128,10 @@ iterator random_node(Individual i){
 
 
 	iterator it = begin(i->tree);
-	iterator ret = it;
+	iterator ret;
 
 	int k;
-	for(k = 2;k < size && it != end(i->tree); k++, it = next(i->tree,it)){
+	for(k = 1;k <= size && it != end(i->tree); k++, it = next(i->tree,it)){
 		double roll = (double)rand() / (RAND_MAX + 1.0);
 		prob = 1/(double)k;
 		if(roll <= prob) ret = it;
@@ -136,7 +167,11 @@ void print_individual(Individual i){
 	int h = 0;
 	if(!heap_empty(i->tree)){
 		for(iterator x = begin(i->tree); x != end(i->tree); x = next(x)){
-			printf("(%d)%c ", parent(x), value(x));
+			printf("(%d)", parent(x));
+
+			if(is_operation(x)) printf("%c\t",convert_operation_simbol(value(x)));
+			else printf("x%d\t",value(x));
+			
 			if(height_iterator(x) > h || h == 0){
 				printf("\n");
 				h++;
@@ -144,6 +179,6 @@ void print_individual(Individual i){
 		}
 	}
 	else{
-		printf("-- Individuo Nulo --\n");
+		printf("-- Empty Individual --\n");
 	}
 }

@@ -14,6 +14,9 @@ void set_fitness(Individual i, double fit);
 //Retorna o fitness do individuo
 int get_fitness(Individual i);
 
+//Avalia o valor do individuo i para dada instancia 'sample'
+double avaliate_individual(Individual i, Training t, int sample);
+
 //Retorna a arvore do Individuo i
 Heap get_tree(Individual i);
 
@@ -24,10 +27,10 @@ void insert_node(Individual i, int v, iterator pos);
 void insert_subtree(Individual i, Heap h, iterator pos);
 
 //Verifica se o no é valido/existe no invidiuo
-int valid_node(Individual i, iterator n);
+int valid_node(Individual i, iterator pos);
 
 //Retorna o valor do nó n no invidiuo
-int node_value(Individual i, iterator n);
+int node_value(Individual i, iterator pos);
 
 //Retorna um iterator para um nó aleatório
 iterator random_node(Individual i);

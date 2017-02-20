@@ -7,7 +7,7 @@ typedef int iterator;
 #define heap_init_capacity 64
 
 //Cria um novo Heap de CHAR
-Heap new_heap();
+Heap new_heap(int heap_capacity);
 
 //Retorna 0 se o heap esta vazio, e 1 caso contrario
 int heap_empty(Heap h);
@@ -23,6 +23,10 @@ void heap_resize(Heap h, int new_capacity);
 
 //Retorna um iterator para a raiz
 iterator heap_root(Heap h);
+
+//Retorna um iterator para antes de begin(raiz do heap)
+//Obs: não é um iterator válido. Usado para percorrer o heap de 'trás pra frente'
+iterator pre_begin(Heap h);
 
 //Retorna um iterator para begin(raiz do heap)
 iterator begin(Heap h);
@@ -59,9 +63,10 @@ iterator right_child(Heap h, iterator x);
 int height_iterator(iterator x);
 
 //Insere o inteiro v no nó i
+//OBS : Sobreescreve caracteres já adcionados.
 void heap_insert(Heap h, int v, iterator i);
 
-//Insere uma subtree do heap sub, com raiz em sub_root, no nó i do heap h
+//Insere uma subtree de sub, com raiz em sub_root, no nó i do heap h
 //OBS : Sobreescreve caracteres já adcionados.
 void heap_insert_subtree(Heap h, Heap sub, iterator i, iterator sub_root);
 

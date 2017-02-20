@@ -46,4 +46,8 @@ double simple_value(char op, double input);
 //Retorna o valor da operação composta para o dado input
 double composite_value(char op, double input1, double input2);
 
+//Converte a representação numerica para a representação simbólica de uma operação
+char convert_operation_simbol(int op);
+
+
 #endif
