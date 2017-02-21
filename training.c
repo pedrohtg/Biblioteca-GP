@@ -185,7 +185,12 @@ int random_variable(Training t){
 //Retorna o valor de um input em uma amostra/caso do dataset
 //Assume que in é uma variável válida
 double input_value(int in, Training t, int sample){
-	return t->data[sample][in];
+	return t->data[sample][in-1];
+}
+
+//Retorna o valor de output de uma amostra/caso do dataset
+double output_value(Training t, int sample){
+	return t->data[sample][t->in_number];
 }
 
 //Retorna o valor da operação simples para o dado input

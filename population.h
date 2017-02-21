@@ -3,6 +3,7 @@
 
 typedef struct PopStruct* Population;
 typedef struct IndStruct* Indvidual;
+typedef struct TrainingStruct* Training;
 
 //Cria uma nova população com tamanho max. size
 Population new_population(int size);
@@ -12,6 +13,9 @@ void initialize_population(Population p, int ind_max_height, Training t);
 
 //Retorna o melhor individuo da População p
 Individual best(Population p);
+
+//Avalia todos os indivuos de uma dada população
+void eval_population(Population p, Training t);
 
 //Verifica se o individual(identificado pelo id) se encontra na População
 int exist_individual(Population p, int id);
@@ -35,5 +39,13 @@ void clear_population(Population p);
 void delete_population(Population p);
 
 //Fitness Function is implemented in this class
+//OBS.: This library is maximum fitness based, in other words, it's maximize the fitness function
+/*
+The fitness function have to respect the following:
+Return type: double
+Parameters: Individual i, Training t
+*/
+double fitness(Individual i, Training t)
+
 
 #endif

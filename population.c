@@ -32,6 +32,7 @@ void initialize_population(Population p, int ind_max_height, Training t){
 }
 
 //Retorna o melhor individuo da População p
+//Caso mais de um individuo tenha o melhor fitness, retorna o mais recentemente adicionado a população
 Individual best(Population p){
 	int i;
 	int best = 0;
@@ -42,6 +43,14 @@ Individual best(Population p){
 	}
 
 	return p->array[best];
+}
+
+//Avalia todos os indivuos de uma dada população
+void eval_population(Population p, Training t){
+	int i;
+	for(i = 0; i < p->size; i++){
+		p[i]->fitness = fitness(p[i],t);
+	}
 }
 
 //Verifica se o individual(identificado pelo id) se encontra na População
@@ -94,3 +103,22 @@ void delete_population(Population p){
 }
 
 //Fitness Function is implemented in this class
+//OBS.: This library is maximum fitness based, in other words, it's maximize the fitness function
+//Example and Default function : 
+//		Minimum Square Distance
+
+double fitness(Individual i, Training t){
+	int k;
+	double sum = 0.0;
+	double val;
+	double out;
+	double dif;
+	for(k = 0; k < t->data_size; k++){
+		val = avaliate_individual(i,t,k);
+		out = output_value(t,k);
+		dif = val - out;
+		sum += dif*dif;
+	}
+
+	return -1*sum;	
+}

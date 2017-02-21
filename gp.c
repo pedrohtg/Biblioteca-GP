@@ -11,6 +11,7 @@ struct GPStruct{
 	Training tr;
 	Population p;
 	//GP Params list
+	int number_gen; 					// Number of generations
 	int pop_size; 						// Population size(fixed max size)
 	int ind_max_height; 				// The maximum height possible for a Individual
 	int mutation_type; 					// (1 => Random change mutation_size nodes; 2 => Insert a random subtree in random node)
@@ -24,17 +25,19 @@ struct GPStruct{
 //General
 
 //Cria uma nova instancia de GP
+//OBS.: Espera-se que o Training t ja tenha sido inicializado.
 GP new_gp(Training t, int integer_parameters[TOTAL_INT_PARAMETER_SIZE], double double_parameters[TOTAL_DOUBLE_PARAMETER_SIZE]){
 	GP gp = malloc(sizeof(struct GPStruct));
 
 	// Set INT Parameters -------------------------------
-	gp->pop_size = integer_parameters[0] ? integer_parameters[0] : DEFAULT_pop_size;
-	gp->ind_max_height = integer_parameters[1] ? integer_parameters[1] : DEFAULT_ind_max_height;			
-	gp->mutation_type = integer_parameters[2] ? integer_parameters[2] : DEFAULT_mutation_type;				
-	gp->mutation_size = integer_parameters[3] ? integer_parameters[3] : DEFAULT_mutation_size;				
-	gp->selection_type = integer_parameters[4] ? integer_parameters[4] : DEFAULT_selection_type;			
-	gp->selection_size_reproduction = integer_parameters[5] ? integer_parameters[5] : DEFAULT_selection_size_reproduction;
-	gp->tournament_round_size = integer_parameters[6] ? integer_parameters[6] : DEFAULT_tournament_round_size;
+	gp->number_gen = integer_parameters[0] ? integer_parameters[0] : DEFAULT_number_gen;
+	gp->pop_size = integer_parameters[1] ? integer_parameters[1] : DEFAULT_pop_size;
+	gp->ind_max_height = integer_parameters[2] ? integer_parameters[2] : DEFAULT_ind_max_height;			
+	gp->mutation_type = integer_parameters[3] ? integer_parameters[3] : DEFAULT_mutation_type;				
+	gp->mutation_size = integer_parameters[4] ? integer_parameters[4] : DEFAULT_mutation_size;				
+	gp->selection_type = integer_parameters[5] ? integer_parameters[5] : DEFAULT_selection_type;			
+	gp->selection_size_reproduction = integer_parameters[6] ? integer_parameters[6] : DEFAULT_selection_size_reproduction;
+	gp->tournament_round_size = integer_parameters[7] ? integer_parameters[7] : DEFAULT_tournament_round_size;
 	// ----------------------------------------------
 
 	// Set DOUBLE Parameters -------------------------------
@@ -55,7 +58,17 @@ GP new_gp(Training t, int integer_parameters[TOTAL_INT_PARAMETER_SIZE], double d
 }
 
 //Executa o processo de gp dada as configurações atuais
-void run_gp(GP gp);
+//Individual run_gp(GP gp){
+void run_gp(GP gp){
+	//init
+	//for 0 to number_gen
+		//eval population
+		//selection
+		//reproduction
+		//replace
+	//
+	//return best_individual
+}
 
 //Apaga a instancia de GP
 void delete_gp(GP gp){

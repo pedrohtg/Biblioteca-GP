@@ -5,12 +5,13 @@ typedef PopStruct* Population;
 typedef struct IndStruct* Indvidual;
 typedef struct GPStruct* GP;
 
-#define TOTAL_INT_PARAMETER_SIZE 7
+#define TOTAL_INT_PARAMETER_SIZE 8
 #define TOTAL_DOUBLE_PARAMETER_SIZE 3
 
 // Params -------------------------------------------
 
 //DEFAULT Params
+#define DEFAULT_number_gen						200 // Population size(fixed max size)
 #define DEFAULT_pop_size						100 // Population size(fixed max size)
 #define DEFAULT_ind_max_height					6 	// The maximum height possible for a Individual
 #define DEFAULT_mutation_type					1 	// (1 => Random change mutation_size nodes; 2 => Insert a random subtree in random node)
@@ -28,16 +29,17 @@ typedef struct GPStruct* GP;
 /*		
 	Cada posição do vetor integer_parameters representa um parametro:
 	OBS: Posições com valor igual a 0 terão por consequencia um valor Default
-[0] - Tamanho da População
-[1] - Altura máxima de um Individuo
-[2] - Tipo de Mutação
-[3] - Tamanho da Mutação(Somente para Mutação Tipo 1)
-[4] - Tipo de Seleção
-[5] - Número de Individuos selecionados para Reprodução/Crossover
-[6] - Números de Individuos observados em um Round de Tournament(Somente para seleção Tournament)
-[7] - 
+[0] - Número de Gerações
+[1] - Tamanho da População
+[2] - Altura máxima de um Individuo
+[3] - Tipo de Mutação
+[4] - Tamanho da Mutação(Somente para Mutação Tipo 1)
+[5] - Tipo de Seleção
+[6] - Número de Individuos selecionados para Reprodução/Crossover
+[7] - Números de Individuos observados em um Round de Tournament(Somente para seleção Tournament)
 [8] - 
 [9] - 
+[10] - 
 .
 .
 .	

@@ -40,6 +40,9 @@ int random_variable(Training t);
 //Retorna o valor de um input em uma amostra/caso do dataset
 double input_value(char in, Training t, int sample);
 
+//Retorna o valor de output de uma amostra/caso do dataset
+double output_value(Training t, int sample);
+
 //Retorna o valor da operação simples para o dado input
 double simple_value(char op, double input);
 

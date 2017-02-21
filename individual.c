@@ -7,7 +7,7 @@
 #include "individual.h"
 #include "training.h"
 
-#define INF DBL_MAX
+#define INF DBL_MIN
 
 struct IndStruct{
 	Heap tree;
@@ -87,6 +87,8 @@ double aux_avaliate(Heap h, int pos, Training t, int sample){
 			return input_value(x,t,sample);
 		}
 	}
+	printf("Error: Invalid node access.\n");
+	return INF;
 }
 
 //Avalia o valor do individuo i para dada instancia 'sample'
