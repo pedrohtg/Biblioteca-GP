@@ -27,13 +27,14 @@ void initialize_population(Population p, int ind_max_height, Training t){
 	int i;
 	for(i = 0; i < p->max_size; i++){
 		p->array[i] = new_individual(ind_max_height,t);
+		p->array[i]->id = i;
 	}
 	p->size = p->max_size;
 }
 
 //Retorna o melhor individuo da População p
 //Caso mais de um individuo tenha o melhor fitness, retorna o mais recentemente adicionado a população
-Individual best(Population p){
+Individual best_individual(Population p){
 	int i;
 	int best = 0;
 	for(i = 1; i < p->size; i++){
@@ -73,6 +74,7 @@ int size_population(Population p){
 void insert_population(Population p, Individual i){
 	if(p->size < p->max_size){
 		p->array[p->size] = i;
+		p->array[p->size]->id = p->size;
 		p->size++;
 	}
 	else{

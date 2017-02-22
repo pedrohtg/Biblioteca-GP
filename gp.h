@@ -5,7 +5,7 @@ typedef PopStruct* Population;
 typedef struct IndStruct* Indvidual;
 typedef struct GPStruct* GP;
 
-#define TOTAL_INT_PARAMETER_SIZE 8
+#define TOTAL_INT_PARAMETER_SIZE 9
 #define TOTAL_DOUBLE_PARAMETER_SIZE 3
 
 // Params -------------------------------------------
@@ -19,6 +19,7 @@ typedef struct GPStruct* GP;
 #define DEFAULT_selection_type					1 	// (1 => Tournament Selection; 2 => (TODO) Roulette Selection)
 #define DEFAULT_selection_size_reproduction 	25  // Number of selected individuals for reproduction 
 #define DEFAULT_tournament_round_size  			10 	// Number of individuals in a single round of tournament
+#define DEFAULT_replace_type					1 	// (1 => The pop_size best individuals in the pool of parents + offspring; 1 => Selection Method in a pool of parents and offspring)
 // TO BE CONTINUED
 
 // --------------------------------------------------
@@ -37,7 +38,7 @@ typedef struct GPStruct* GP;
 [5] - Tipo de Seleção
 [6] - Número de Individuos selecionados para Reprodução/Crossover
 [7] - Números de Individuos observados em um Round de Tournament(Somente para seleção Tournament)
-[8] - 
+[8] - Tipo de Substituição na população
 [9] - 
 [10] - 
 .
@@ -71,6 +72,12 @@ void delete_gp(GP gp);
 //Realiza uma seleção por torneio
 Population tournament(Population p, int rounds, int round_size);
 
+//Realiza uma seleção por torneio em um pool formado pela população p + população l
+Population tournament_pool(Population p, Population l, int rounds, int round_size);
+
+//Seleciona os n melhores individuos do pool (p + l) 
+Population select_best_pool(Population p, Population l, int n);
+
 // --------------------------------------------------
 
 //Reproduction Methods: Crossovers and Mutations ----
@@ -80,6 +87,9 @@ void crossover(Individual i1, Individual i2);
 void mutation(Individual i);
 
 // --------------------------------------------------
+
+//Replace Method
+void replace(GP gp, Population offspring);
 
 //Stop(?)
 

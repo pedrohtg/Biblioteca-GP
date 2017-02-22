@@ -12,7 +12,7 @@ Population new_population(int size);
 void initialize_population(Population p, int ind_max_height, Training t);
 
 //Retorna o melhor individuo da População p
-Individual best(Population p);
+Individual best_individual(Population p);
 
 //Avalia todos os indivuos de uma dada população
 void eval_population(Population p, Training t);

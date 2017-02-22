@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <random.h>
+#include <float.h>
 #include "population.h"
 #include "individual.h"
 #include "gp.h"
@@ -19,6 +20,7 @@ struct GPStruct{
 	int selection_type; 				// (1 => Tournament Selection; 2 => (TODO) Roulette Selection)
 	int selection_size_reproduction; 	// Number of selected individuals for reproduction 
 	int tournament_round_size; 			// Number of individuals in a single round of tournament
+	int replace_type;					// (1 => The pop_size best individuals in the pool of parents + offspring; 1 => Selection Method in a pool of parents and offspring)
 	//TO BE CONTINUED --- 
 };	
 
@@ -38,6 +40,7 @@ GP new_gp(Training t, int integer_parameters[TOTAL_INT_PARAMETER_SIZE], double d
 	gp->selection_type = integer_parameters[5] ? integer_parameters[5] : DEFAULT_selection_type;			
 	gp->selection_size_reproduction = integer_parameters[6] ? integer_parameters[6] : DEFAULT_selection_size_reproduction;
 	gp->tournament_round_size = integer_parameters[7] ? integer_parameters[7] : DEFAULT_tournament_round_size;
+	gp->replace_type = integer_parameters[8] ? integer_parameters[8] : DEFAULT_replace_type;
 	// ----------------------------------------------
 
 	// Set DOUBLE Parameters -------------------------------
@@ -102,16 +105,127 @@ Population tournament(Population p, int rounds, int round_size){
 			chosen = rand() % size;
 			fit = get_fitness(get_individual(p,chosen));
 			if(fit >= best_fit){
-				best = chosen_id;
+				best = chosen;
 				best_fit = fit;
 			}
 		}
 
-		insert_population(ret,get_individual(best));
+		insert_population(ret,get_individual(p,best));
 	}
 
 	return ret;
 }
+
+//Realiza uma seleção por torneio em um pool formado pela população p + população l
+Population tournament_pool(Population p, Population l, int rounds, int round_size){
+	srand(time(NULL));
+
+	Population ret = new_population(rounds);
+	int i,k;
+	int size_p = size_population(p);
+	int size_l = size_population(l);
+	int size = size_p + size_l;
+	int chosen,best,best_mod;
+	double best_fit,fit;
+
+	chosen_id = rand() % size;
+
+	best = chosen_id;
+	best_fit = chosen_id < size_p ? get_fitness(get_individual(p,chosen_id)) : get_fitness(get_individual(l,(chosen_id - size_p)));
+
+	for(i = 0; i < rounds; i++){
+
+		for(k = 0; k < round_size; k++){
+			chosen = rand() % size;
+			fit = chosen < size_p ? get_fitness(get_individual(p,chosen)) : get_fitness(get_individual(l,(chosen - size_p)));
+			if(fit >= best_fit){
+				best = chosen;
+				best_fit = fit;
+			}
+		}
+
+		if(best < size_p)
+			insert_population(ret,get_individual(p,best));
+		else
+			insert_population(ret,get_individual(l,best - size_p));
+	}
+
+	return ret;
+}
+
+
+//Seleciona os n melhores individuos do pool (p + l) 
+Population select_best_pool(Population p, Population l, int n){
+	int size_p = size_population(p);
+	int size_l = size_population(l);
+
+	if(n > size_p + size_l){
+		printf("Error: in function 'select_best_pool': Size of the pool is smaller than the number of to be select individuals.\n");
+		return NULL;
+	}
+
+	int v* = calloc(size_p + size_l, sizeof(int));
+
+	Population ret = new_population(n);
+	int best_p, best_l;
+	double b_fit_p, b_fit_l;
+	int i, k, get_p, get_l;
+	get_p = get_l = 1;
+
+	for(k = 0; k < n; k++){
+		if(get_p){
+			//pega best p
+			int best_id = -1;
+			double best_fit = DBL_MIN;
+
+			for(i = 0; i < size_p; i++){
+				double fit = get_fitness(get_individual(p,i));
+				if(fit >= best_fit && !v[i]){
+					best_id = i;
+					best_fit = fit;
+				}
+			}
+
+			best_p = best_id;
+			b_fit_p = best_fit;
+		}
+		if(get_l){
+			//pega best l
+			int best_id = -1;
+			double best_fit = DBL_MIN;
+
+			for(i = 0; i < size_l; i++){
+				double fit = get_fitness(get_individual(l,i));
+				if(fit >= best_fit && !v[i + size_p]){
+					best_id = i;
+					best_fit = fit;
+				}
+			}
+
+			best_l = best_id;
+			b_fit_l = best_fit;
+		}
+
+		if(best_l == -1 || b_fit_p > b_fit_l){
+			insert_population(ret, get_individual(p, best_p));
+			get_p = 1;
+			get_l = 0;
+			v[best_p] = 1;
+		}
+		else{
+			insert_population(ret, get_individual(l, best_l));
+			get_p = 0;
+			get_l = 1;
+			v[best_l + size_p] = 1;
+		}		
+		
+	}
+
+	free(v);
+	return ret;
+}
+
+// ------------------------------------------------------------
 
 //Reproduction Methods: Crossovers and Mutations
 void crossover(Individual i1, Individual i2){
@@ -166,6 +280,21 @@ void mutation(GP gp, Individual i){
 		delete_individual(sub);
 	}
 
+}
+
+// --------------------------------------------------
+// Replace method
+void replace(GP gp, Population offspring){
+	if(gp->replace_type == 1){
+		Population ret = select_best_pool(gp->p, offspring, gp->pop_size);
+		delete_population(gp->p);
+		gp->p = ret;
+	}
+	else if(gp->replace_type == 2){
+		Population ret = tournament_pool(gp->p, offspring, gp->pop_size, gp->tournament_round_size);
+		delete_population(gp->p);
+		gp->p = ret;		
+	}
 }
 
 //Stop(?)
