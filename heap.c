@@ -40,6 +40,16 @@ int heap_size(Heap h){
 	return h->size;
 }
 
+//Retorna o tamanho do heap
+int heap_capacity(Heap h){
+	return h->capacity;
+}
+
+//Retorna a altura do heap
+int heap_height(Heap h){
+	return h->height;
+}
+
 //Aumenta o tamanho máximo do heap
 void heap_resize(Heap h, int new_capacity){
 	if(new_capacity > h->capacity){
@@ -247,14 +257,24 @@ void clear_heap(Heap h){
 
 //Apaga o conteúdo de g e copia h para g
 void heap_copy(Heap h, Heap g){
-	int *v = (int*)calloc(h->capacity, sizeof(int));
-	int i;
-	for(i = 0; i < h->capacity; i++){
-		v[i] = h->array[i];
+	if(h->capacity != g->capacity){
+		free(g->array);
+
+		int *v = (int*)calloc(h->capacity, sizeof(int));
+		int i;
+		for(i = 0; i < h->capacity; i++){
+			v[i] = h->array[i];
+		}
+		
+		g->array = v;
+	}
+	else{
+		int i;
+		for(i = 0; i < h->capacity; i++){
+			g->array[i] = h->array[i];
+		}
 	}
 
-	free(g->array);
-	g->array = v;
 	g->size = h->size;
 	g->height = h->height;
 	g->capacity = h->capacity;

@@ -64,6 +64,18 @@ GP new_gp(Training t, int integer_parameters[TOTAL_INT_PARAMETER_SIZE], double d
 //Individual run_gp(GP gp){
 void run_gp(GP gp){
 	//init
+	if(!initialized(gp->t)){
+		printf("Error: The training object wasn't correctly initialized.\n");
+		return;
+	}
+	int g,i,j,k;
+	Population selected, offspring;
+	for(g = 0; g < gp->number_gen; g++){
+		eval_population(gp->p);
+		//selection method --> TODO
+		selected = tournament(gp->p, gp->selection_size_reproduction, gp->tournament_round_size);
+
+	}
 	//for 0 to number_gen
 		//eval population
 		//selection
@@ -228,29 +240,34 @@ Population select_best_pool(Population p, Population l, int n){
 // ------------------------------------------------------------
 
 //Reproduction Methods: Crossovers and Mutations
-void crossover(Individual i1, Individual i2){
+void crossover(Individual i1, Individual i2, Population offspring){
 	srand(time(NULL));
-	iterator r1 = random_node(i1);
-	iterator r2 = random_node(i2);
+	Individual k1 = copy_individual(i1);
+	Individual k2 = copy_individual(i2);
+
+	iterator r1 = random_node(k1);
+	iterator r2 = random_node(k2);
 
 	//Trata o caso em que os dois nos escolhidos sao as raizes do individuos,
 	//resultando em um simples swap;
 	int coin;
-	while(r1 == root_individual(i1) && r2 == root_individual(i2)){
+	while(r1 == root_individual(k1) && r2 == root_individual(k2)){
 		coin = rand() % 2;
-		if(coin) r1 = random_node(i1);
-		else r2 = random_node(i2);
+		if(coin) r1 = random_node(k1);
+		else r2 = random_node(k2);
 	}
 
 
-	swap_subtree(i1, r1, i2 ,r2);
+	swap_subtree(k1, r1, k2 ,r2);
+	insert_population(k1);
+	insert_population(k2);
 }
 
 void mutation(GP gp, Individual i){
 	srand(time(NULL));
 	if(gp->mutation_type == 1){
-		int i = 0;
-		for(;i < gp->mutation_size; i++){
+		int x = 0;
+		for(;x < gp->mutation_size; x++){
 			iterator chosen = random_node(i);
 			int chosen_value  = node_value(i,chosen);
 

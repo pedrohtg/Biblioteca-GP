@@ -82,9 +82,9 @@ Population select_best_pool(Population p, Population l, int n);
 
 //Reproduction Methods: Crossovers and Mutations ----
 
-void crossover(Individual i1, Individual i2);
+void crossover(Individual i1, Individual i2, Population offspring);
 
-void mutation(Individual i);
+void mutation(GP gp, Individual i);
 
 // --------------------------------------------------
 

@@ -62,6 +62,12 @@ void delete_training(Training t){
 void set_operations(Training t, int number, ...){
 	int i,pos;
 	char c;
+
+	if(number == 0){
+		printf("Error: Not a valid number of operations. The default setting will be used.\n");
+		return;
+	}
+
 	va_list v;
 	va_start(v,number);
 
@@ -97,6 +103,10 @@ void initialize_data(char* filename, Training t){
 		//printf("Erro: O número de váriaveis do arquivo é diferente do configurado no programa.\n");
 		return;
 	}
+	if(n == 0 || m == 0){
+		printf("Error: Insufficient number of variables and/or instances.\n");
+		return;
+	}
 
 	int i,j;
 
@@ -113,6 +123,11 @@ void initialize_data(char* filename, Training t){
 	}
 
 	fclose(fp);
+}
+
+//Checa se o objeto foi inicializado corretamente
+int initialized(Training t){
+	return t->data_size > 0;
 }
 
 //Determina se tal Representante k, é uma operação ou variavel/constante

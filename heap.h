@@ -18,6 +18,9 @@ int heap_size(Heap h);
 //Retorna o tamanho do heap
 int heap_capacity(Heap h);
 
+//Retorna a altura do heap
+int heap_height(Heap h);
+
 //Aumenta o tamanho máximo do heap
 void heap_resize(Heap h, int new_capacity);
 

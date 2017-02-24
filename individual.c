@@ -12,6 +12,7 @@
 struct IndStruct{
 	Heap tree;
 	int id;
+	int mx_height;
 	double fitness;
 };
 
@@ -50,6 +51,7 @@ Individual new_individual(int max_height, Training t){
 	i->tree = h;
 	i->id = 0;
 	i->fitness = INF;
+	i->mx_height = max_height;
 
 	// random initialize heap
 	random_init(i,t, max_height, 0, 0);
@@ -66,6 +68,16 @@ void set_fitness(Individual i, double fit){
 //Retorna o fitness do individuo
 int get_fitness(Individual i){
 	return i->fitness;
+}
+
+//Retorna a altura do individuo
+int individual_height(Individual i){
+	return heap_height(i->tree);
+}
+
+//Retorna a altura máxima que o individuo pode atingir
+int individual_max_height(Individual i){
+	return i->mx_height;
 }
 
 //Funcao auxiliar para avaliar o valor de um individuo
@@ -145,6 +157,20 @@ iterator random_node(Individual i){
 //Retorna um iterator para a raiz do Individuo
 iterator root_individual(Individual i){
 	return heap_root(i->tree);
+}
+
+//Retorna uma cópia do Individuo i
+Individual copy_individual(Individual i){
+	Heap h = new_heap(pow(2,i->mx_height + 1) - 1);
+	heap_copy(i->tree, h);
+
+	Individual cp = malloc(sizeof(struct IndStruct));
+	cp->tree = h;
+	cp->id = i->id;
+	cp->fitness = i->fitness;
+	cp->mx_height = i->mx_height;
+
+	return cp;
 }
 
 //Apaga um Individuo

@@ -18,6 +18,9 @@ void set_operations(Training t, int number, ...);
 // => As próximas m linhas contem (n + 1) reais onde os n primeiros são os valores das váriaveis e o n+1 é o valor da função dadas as entradas
 void initialize_data(char* filename, Training t);
 
+//Checa se o objeto foi inicializado corretamente
+int initialized(Training t);
+
 //Determina se tal Representante k, é uma operação ou variavel/constante
 int is_operation(int k);
 

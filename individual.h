@@ -14,6 +14,12 @@ void set_fitness(Individual i, double fit);
 //Retorna o fitness do individuo
 int get_fitness(Individual i);
 
+//Retorna a altura do individuo
+int individual_height(Individual i);
+
+//Retorna a altura máxima que o individuo pode atingir
+int individual_max_height(Individual i);
+
 //Avalia o valor do individuo i para dada instancia 'sample'
 double avaliate_individual(Individual i, Training t, int sample);
 
@@ -38,6 +44,9 @@ iterator random_node(Individual i);
 //Retorna um iterator para a raiz do Individuo
 iterator root_individual(Individual i);
 
+//Retorna uma cópia do Individuo i
+Individual copy_individual(Individual i);
+
 //Apaga um Individuo
 void delete_individual(Individual i);
 
@@ -46,5 +55,7 @@ void swap_subtree(Individual i1, iterator r1, Indivual i2, iterator r2);
 
 //Imprime o individuo na tela
 void print_individual(Individual i);
+
+
 
 #endif
