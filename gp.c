@@ -69,12 +69,34 @@ void run_gp(GP gp){
 		return;
 	}
 	int g,i,j,k;
+	int n = gp->selection_size_reproduction;
 	Population selected, offspring;
 	for(g = 0; g < gp->number_gen; g++){
+		srand(time(NULL));
 		eval_population(gp->p);
 		//selection method --> TODO
 		selected = tournament(gp->p, gp->selection_size_reproduction, gp->tournament_round_size);
 
+		//Crossover
+		offspring = new_population(2*n);
+		
+		int paired = malloc(n*sizeof(int));
+		for(k = 0; k < n; k++) paired[k] = -1;
+
+		for(i = 0; i < n; i++){
+			int r = rand()%n;
+
+			while(r == i || paired[r] == i) r = rand()%n;
+
+			crossover(get_individual(selected,i), get_individual(selected,r), offspring);
+			paired[i] = r;
+			paired[r] = i;
+		}
+
+		//Mutation
+
+		//Replace
+		replace(gp, offspring);
 	}
 	//for 0 to number_gen
 		//eval population
