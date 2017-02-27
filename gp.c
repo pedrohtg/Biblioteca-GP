@@ -18,10 +18,12 @@ struct GPStruct{
 	int mutation_type; 					// (1 => Random change mutation_size nodes; 2 => Insert a random subtree in random node)
 	int mutation_size; 					// For the type 1 mutation
 	int selection_type; 				// (1 => Tournament Selection; 2 => (TODO) Roulette Selection)
-	int selection_size_reproduction; 	// Number of selected individuals for reproduction 
+	//int selection_size_reproduction; 	// Number of selected individuals for reproduction 
 	int tournament_round_size; 			// Number of individuals in a single round of tournament
 	int replace_type;					// (1 => The pop_size best individuals in the pool of parents + offspring; 1 => Selection Method in a pool of parents and offspring)
-	//TO BE CONTINUED --- 
+	//Doubles
+	double crossover_probabilty;		// Percentual of population to be in crossover
+	double mutation_probability;		// Percentual of population that can be mutated
 };	
 
 //General
@@ -32,23 +34,20 @@ GP new_gp(Training t, int integer_parameters[TOTAL_INT_PARAMETER_SIZE], double d
 	GP gp = malloc(sizeof(struct GPStruct));
 
 	// Set INT Parameters -------------------------------
-	gp->number_gen = integer_parameters[0] ? integer_parameters[0] : DEFAULT_number_gen;
-	gp->pop_size = integer_parameters[1] ? integer_parameters[1] : DEFAULT_pop_size;
-	gp->ind_max_height = integer_parameters[2] ? integer_parameters[2] : DEFAULT_ind_max_height;			
-	gp->mutation_type = integer_parameters[3] ? integer_parameters[3] : DEFAULT_mutation_type;				
-	gp->mutation_size = integer_parameters[4] ? integer_parameters[4] : DEFAULT_mutation_size;				
-	gp->selection_type = integer_parameters[5] ? integer_parameters[5] : DEFAULT_selection_type;			
-	gp->selection_size_reproduction = integer_parameters[6] ? integer_parameters[6] : DEFAULT_selection_size_reproduction;
-	gp->tournament_round_size = integer_parameters[7] ? integer_parameters[7] : DEFAULT_tournament_round_size;
-	gp->replace_type = integer_parameters[8] ? integer_parameters[8] : DEFAULT_replace_type;
+	gp->number_gen = integer_parameters[0] > 0 ? integer_parameters[0] : DEFAULT_number_gen;
+	gp->pop_size = integer_parameters[1] > 0 ? integer_parameters[1] : DEFAULT_pop_size;
+	gp->ind_max_height = integer_parameters[2] > 0 ? integer_parameters[2] : DEFAULT_ind_max_height;			
+	gp->mutation_type = integer_parameters[3] > 0 ? integer_parameters[3] : DEFAULT_mutation_type;				
+	gp->mutation_size = integer_parameters[4] > 0 ? integer_parameters[4] : DEFAULT_mutation_size;				
+	gp->selection_type = integer_parameters[5] > 0 ? integer_parameters[5] : DEFAULT_selection_type;			
+	//gp->selection_size_reproduction = integer_parameters[6] ? integer_parameters[6] : DEFAULT_selection_size_reproduction;
+	gp->tournament_round_size = integer_parameters[6] > 0 ? integer_parameters[6] : DEFAULT_tournament_round_size;
+	gp->replace_type = integer_parameters[7] > 0 ? integer_parameters[7] : DEFAULT_replace_type;
 	// ----------------------------------------------
 
-	// Set DOUBLE Parameters -------------------------------
-	/*
-	gp->pop_size = integer_parameters[0] ? integer_parameters[0] : DEFAULT_pop_size;				
-	gp->mutation_type = integer_parameters[1] ? integer_parameters[1] : DEFAULT_mutation_type;				
-	gp->mutation_size = integer_parameters[2] ? integer_parameters[2] : DEFAULT_mutation_size;	
-	*/		
+	// Set DOUBLE Parameters -------------------------------	
+	gp->crossover_probabilty = double_parameters[0] > 0 ? double_parameters[0] : DEFAULT_crossover_probabilty;				
+	gp->mutation_probability = double_parameters[1] > 0 ? double_parameters[1] : DEFAULT_mutation_probability;				
 	// ----------------------------------------------
 
 	Population pop = new_population(gp->pop_size);
@@ -61,43 +60,54 @@ GP new_gp(Training t, int integer_parameters[TOTAL_INT_PARAMETER_SIZE], double d
 }
 
 //Executa o processo de gp dada as configurações atuais
-//Individual run_gp(GP gp){
-void run_gp(GP gp){
+Individual run_gp(GP gp){
 	//init
 	if(!initialized(gp->t)){
 		printf("Error: The training object wasn't correctly initialized.\n");
 		return;
 	}
 	int g,i,j,k;
-	int n = gp->selection_size_reproduction;
+	int cr_size = (int)(gp->crossover_probabilty * gp->pop_size);
+	int mt_size = (int)(gp->crossover_probabilty * gp->pop_size);
 	Population selected, offspring;
 	for(g = 0; g < gp->number_gen; g++){
 		srand(time(NULL));
 		eval_population(gp->p);
 		//selection method --> TODO
-		selected = tournament(gp->p, gp->selection_size_reproduction, gp->tournament_round_size);
+		selected = tournament(gp->p, cr_size, gp->tournament_round_size);
 
 		//Crossover
-		offspring = new_population(2*n);
+		offspring = new_population(2*cr_size);
 		
-		int paired = malloc(n*sizeof(int));
-		for(k = 0; k < n; k++) paired[k] = -1;
+		int paired = malloc(cr_size*sizeof(int));
+		for(k = 0; k < cr_size; k++) paired[k] = -1;
 
-		for(i = 0; i < n; i++){
-			int r = rand()%n;
+		for(i = 0; i < cr_size; i++){
+			int r = rand()%cr_size;
 
-			while(r == i || paired[r] == i) r = rand()%n;
+			while(r == i || paired[r] == i) r = rand()%cr_size;
 
 			crossover(get_individual(selected,i), get_individual(selected,r), offspring);
 			paired[i] = r;
-			paired[r] = i;
 		}
+		// ---------------------
 
 		//Mutation
+		for(j = 0; j < mt_size; j++){
+			int r = rand()%(2*cr_size);
+
+			while(paired[r] == -1) r = rand%(2*cr_size);
+
+			mutation(gp, get_individual(offspring, r));
+			paired[r] = -1;
+		}
 
 		//Replace
 		replace(gp, offspring);
 	}
+
+	return best_individual(gp->p);
+
 	//for 0 to number_gen
 		//eval population
 		//selection
