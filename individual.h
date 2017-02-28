@@ -12,7 +12,13 @@ Individual new_individual(int max_height, Training t);
 void set_fitness(Individual i, double fit);
 
 //Retorna o fitness do individuo
-int get_fitness(Individual i);
+double get_fitness(Individual i);
+
+//Altera o id do individuo
+void set_id(Individual i, int id);
+
+//Retorna o id do individuo
+int get_id(Individual i);
 
 //Retorna a altura do individuo
 int individual_height(Individual i);
@@ -35,7 +41,7 @@ void insert_subtree(Individual i, Heap h, iterator pos);
 //Verifica se o no é valido/existe no invidiuo
 int valid_node(Individual i, iterator pos);
 
-//Retorna o valor do nó n no invidiuo
+//Retorna o valor do nó pos no invidiuo
 int node_value(Individual i, iterator pos);
 
 //Retorna um iterator para um nó aleatório

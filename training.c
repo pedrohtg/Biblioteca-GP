@@ -19,15 +19,15 @@ double mod(double a);
 // ------------------------
 // Auxiliar functions -----
 //int get_input_position(char in, Training t);
-int convert_operation_simbol(char c);
-void (*fun)(double) op_func_simple(int op);
-void (*fun)(double, double) op_func_composite(int op);
+int convert_simbol_operation(char c);
+double (*fun)(double) op_func_simple(int op);
+double (*fun)(double, double) op_func_composite(int op);
 int op_pos(int op);
 // ------------------------
 // ------------------------
 
 struct TrainingStruct{
-	int operation[TOTAL_OP_NUMBER];	// Representa se as operações {+, -, *, /, raiz quadrada(√), exponencial(^), modulo(#)} são validas, respectivamente;
+	int operation[TOTAL_OP_NUMBER];	// Representa se as operações {+, -, *, /,  [a^b]exponencial(^), square_root(√) modulo(#)} são validas, respectivamente;
 	int op_number;		// Numero de operações ativadas. 
 	int in_number;		// Numero de inputs; As variaveis são representadas de 1 até in_number.
 	double** data;		// Matriz que armazena os valores das instancias de treinamento
@@ -63,7 +63,7 @@ void set_operations(Training t, int number, ...){
 	int i,pos;
 	char c;
 
-	if(number == 0){
+	if(number <= 0){
 		printf("Error: Not a valid number of operations. The default setting will be used.\n");
 		return;
 	}
@@ -99,11 +99,11 @@ void initialize_data(char* filename, Training t){
 	int n, m;
 	fscanf(fp, "%d %d",n,m);
 	if(n != t->in_number){
-		printf("Error: Incompatible number of variables in file and configured in program.\n");
+		printf("Error: Incompatible number of variables in file and configured in the program.\n");
 		//printf("Erro: O número de váriaveis do arquivo é diferente do configurado no programa.\n");
 		return;
 	}
-	if(n == 0 || m == 0){
+	if(n <= 0 || m <= 0){
 		printf("Error: Insufficient number of variables and/or instances.\n");
 		return;
 	}
@@ -112,13 +112,11 @@ void initialize_data(char* filename, Training t){
 
 	t->data_size = m;
 	t->data = malloc(m*sizeof(double*));
-	for(i = 0; i < m; i++){
-		t->data[i] = malloc((n+1)*sizeof(double));
-	}
 
 	for(i = 0; i < m; i++){
+		t->data[i] = malloc((n+1)*sizeof(double));
 		for(j = 0; j < n+1; j++){
-			fscanf(fp,"%d", t->data[i][j]);
+			fscanf(fp,"%lf", t->data[i][j]);
 		}
 	}
 
@@ -140,7 +138,7 @@ int is_operation(int k){
 //Determina se tal representante k é uma operação simples(atua sobre uma variavel) ou composta(atua sobre duas variaveis)
 //Obs: Assume que k representa uma operação
 int is_simple(int k){
-	if(k == -5 || k == -7) return 1;
+	if(k == -6 || k == -7) return 1;
 	return 0;
 }
 
@@ -159,7 +157,7 @@ int random_simple_operation(Training t){
 	srand(time(NULL));
 	int coin = rand()%2;
 	int sq = convert_simbol_operation('√');
-	int md = convert_simbol_operation('#')
+	int md = convert_simbol_operation('#');
 	if(t->operation[sq] && coin) return ((-1)*sq - 1);
 	else if(t->operation[md]) return ((-1)*md - 1);
 	else if(t->operation[sq]) return ((-1)*sq - 1);
@@ -177,7 +175,7 @@ int random_composite_operation(Training t){
 	int pt = convert_simbol_operation('^');
 	for(i = 0; i < pt; i++) sum += t->operation[i];
 
-	if(sum == 0){
+	if(sum  == 0){
 		printf("Error: No composite operation set in this Training.\n");
 		return random_operation(t);
 	}
@@ -194,7 +192,7 @@ int random_variable(Training t){
 	srand(time(NULL));
 
 	double r = rand()/(1.0 + RAND_MAX); 
-    return (r * t->in_number) + 1;
+    return (r * (t->in_number + 1)) + 1;
 }
 
 //Retorna o valor de um input em uma amostra/caso do dataset
@@ -210,13 +208,13 @@ double output_value(Training t, int sample){
 
 //Retorna o valor da operação simples para o dado input
 double simple_value(int op, double input){
-	void (*fun)(double) func = op_func_simple(op);
+	double (*func)(double) = op_func_simple(op);
 	return func(input);
 }
 
 //Retorna o valor da operação composta para o dado input
 double composite_value(int op, double input1, double input2){
-	void (*fun)(double,double) func = op_func_composite(op);
+	double (*func)(double,double) = op_func_composite(op);
 	return func(input1,input2);
 }
 
@@ -282,10 +280,10 @@ char convert_operation_simbol(int op){
 			return '/';
 			break;
 		case -5: 
-			return '√';
+			return '^';
 			break;
 		case -6: 
-			return '^';
+			return '√';
 			break;
 		case -7: 
 			return '#';
@@ -309,47 +307,47 @@ int convert_simbol_operation(char op){
 		case '/': 
 			return 3;
 			break;
-		case '√': 
+		case '^': 
 			return 4;
 			break;
-		case '^': 
+		case '√': 
 			return 5;
 			break;
 		case '#': 
 			return 6;
 			break;
 		default :
-			return 7;
+			return -1;
 	}
 }
 
-void (*fun)(double) op_func_simple(int op){
+double (*fun)(double) op_func_simple(int op){
 	switch(op){
-		case -5: 
-			return sqr;
+		case -6: 
+			return &sqr;
 			break;
 		case -7: 
-			return mod;
+			return &mod;
 			break;
 	}
 }
 
-void (*fun)(double, double) op_func_composite(int op){
+double (*fun)(double, double) op_func_composite(int op){
 	switch(op){
 		case -1: 
-			return add;
+			return &add;
 			break;
 		case -2: 
-			return sub;
+			return &sub;
 			break;
 		case -3: 
-			return mux;
+			return &mux;
 			break;
 		case -4: 
-			return div;
+			return &div;
 			break;
-		case -6: 
-			return pot;
+		case -5: 
+			return &pot;
 			break;
 	}
 }

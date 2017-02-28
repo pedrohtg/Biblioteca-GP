@@ -168,11 +168,11 @@ void heap_insert(Heap h, int v, iterator i){
 }
 
 //Função auxiliar, para a inserção de uma subárvore sub em um heap h
+//Assume que é possivel inserir a subarvore no heap h
 void aux_subtree(Heap h, Heap sub, iterator h_actual, iterator sub_actual){
 	if(!use(h,h_actual)) h->size++;
 	h->array[h_actual] = sub->array[sub_actual];
-	(*count)++;
-
+	
 	//Atualiza a altura do heap
 	int actual_height = height_iterator(h_actual);
 	if(h->height < actual_height){
@@ -199,23 +199,27 @@ void heap_insert_subtree(Heap h, Heap sub, iterator i, iterator sub_root){
 
 	heap_remove(h, i);
 
-	aux_subtree(h, sub, i, sub_root);
+	if(i == heap_root(h) || use(parent(i))){
+		aux_subtree(h, sub, i, sub_root);
+	}
 }
 
 //Retorna a subtree de h com raiz r
 Heap get_subtree(Heap h, iterator r){
-	if(r == heap_root(h)) return h;
-
-	Heap sub = new_heap();
-	heap_insert_subtree(sub,h,0,r);
+	Heap sub = new_heap(h->capacity);
+	if(r == heap_root(h)) {
+		heap_copy(h,sub);
+	}else{
+		heap_insert_subtree(sub,h,0,r);
+	}
 
 	return sub;
 }
 
 //Remove o o nó e toda a sua subarvore
 void heap_remove(Heap h, iterator i){
-	if(valid(h,i)){
-		if(use(h,i)) h->size--;
+	if(use(h,i)){
+		h->size--;
 		h->array[i] = 0;
 		
 		iterator l = left_child(h,i);
@@ -248,7 +252,7 @@ void heap_swap(Heap h, Heap g){
 
 //Apaga o conteúdo do Heap h
 void clear_heap(Heap h){
-	int i = 0;
+	int i;
 	for(i = 0; i < h->capacity; i++)
 		h->array[i] = 0;
 	h->size = 0;

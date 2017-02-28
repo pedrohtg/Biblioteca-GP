@@ -45,7 +45,7 @@ The fitness function have to respect the following:
 Return type: double
 Parameters: Individual i, Training t
 */
-double fitness(Individual i, Training t)
+double fitness(Individual i, Training t);
 
 
 #endif

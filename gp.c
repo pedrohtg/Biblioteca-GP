@@ -16,9 +16,8 @@ struct GPStruct{
 	int pop_size; 						// Population size(fixed max size)
 	int ind_max_height; 				// The maximum height possible for a Individual
 	int mutation_type; 					// (1 => Random change mutation_size nodes; 2 => Insert a random subtree in random node)
-	int mutation_size; 					// For the type 1 mutation
+	int mutation_size; 					// For the type 1 mutation; Number of nodes that will be changed
 	int selection_type; 				// (1 => Tournament Selection; 2 => (TODO) Roulette Selection)
-	//int selection_size_reproduction; 	// Number of selected individuals for reproduction 
 	int tournament_round_size; 			// Number of individuals in a single round of tournament
 	int replace_type;					// (1 => The pop_size best individuals in the pool of parents + offspring; 1 => Selection Method in a pool of parents and offspring)
 	//Doubles
@@ -40,7 +39,6 @@ GP new_gp(Training t, int integer_parameters[TOTAL_INT_PARAMETER_SIZE], double d
 	gp->mutation_type = integer_parameters[3] > 0 ? integer_parameters[3] : DEFAULT_mutation_type;				
 	gp->mutation_size = integer_parameters[4] > 0 ? integer_parameters[4] : DEFAULT_mutation_size;				
 	gp->selection_type = integer_parameters[5] > 0 ? integer_parameters[5] : DEFAULT_selection_type;			
-	//gp->selection_size_reproduction = integer_parameters[6] ? integer_parameters[6] : DEFAULT_selection_size_reproduction;
 	gp->tournament_round_size = integer_parameters[6] > 0 ? integer_parameters[6] : DEFAULT_tournament_round_size;
 	gp->replace_type = integer_parameters[7] > 0 ? integer_parameters[7] : DEFAULT_replace_type;
 	// ----------------------------------------------
@@ -69,7 +67,14 @@ Individual run_gp(GP gp){
 	int g,i,j,k;
 	int cr_size = (int)(gp->crossover_probabilty * gp->pop_size);
 	int mt_size = (int)(gp->crossover_probabilty * gp->pop_size);
+	
+	int *paired = malloc(cr_size*sizeof(int));
+	int *mutated = malloc(2*cr_size*sizeof(char));
+
 	Population selected, offspring;
+
+	offspring = new_population(2*cr_size);
+	
 	for(g = 0; g < gp->number_gen; g++){
 		srand(time(NULL));
 		eval_population(gp->p);
@@ -77,10 +82,11 @@ Individual run_gp(GP gp){
 		selected = tournament(gp->p, cr_size, gp->tournament_round_size);
 
 		//Crossover
-		offspring = new_population(2*cr_size);
-		
-		int paired = malloc(cr_size*sizeof(int));
-		for(k = 0; k < cr_size; k++) paired[k] = -1;
+		for(k = 0; k < cr_size; k++){
+			paired[k] = -1;
+			mutated[k] = 0;
+			mutated[k + cr_size] = 0;
+		}
 
 		for(i = 0; i < cr_size; i++){
 			int r = rand()%cr_size;
@@ -96,15 +102,20 @@ Individual run_gp(GP gp){
 		for(j = 0; j < mt_size; j++){
 			int r = rand()%(2*cr_size);
 
-			while(paired[r] == -1) r = rand%(2*cr_size);
+			while(mutated[r] == 0) r = rand%(2*cr_size);
 
 			mutation(gp, get_individual(offspring, r));
-			paired[r] = -1;
+			mutated[r] = 0;
 		}
 
 		//Replace
 		replace(gp, offspring);
+
+		clear_population(offspring);
 	}
+
+	free(paired);
+	free(mutated);
 
 	return best_individual(gp->p);
 

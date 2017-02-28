@@ -3,6 +3,7 @@
 
 typedef PopStruct* Population;
 typedef struct IndStruct* Indvidual;
+typedef struct TrainingStruct* Training;
 typedef struct GPStruct* GP;
 
 #define TOTAL_INT_PARAMETER_SIZE 8
@@ -17,7 +18,6 @@ typedef struct GPStruct* GP;
 #define DEFAULT_mutation_type					1 		// (1 => Random change mutation_size nodes; 2 => Insert a random subtree in random node)
 #define DEFAULT_mutation_size					2 		// For the type 1 mutation
 #define DEFAULT_selection_type					1 		// (1 => Tournament Selection; 2 => (TODO) Roulette Selection)
-//#define DEFAULT_selection_size_reproduction 	25  	// Number of selected individuals for reproduction 
 #define DEFAULT_tournament_round_size  			10 		// Number of individuals in a single round of tournament
 #define DEFAULT_replace_type					1 		// (1 => The pop_size best individuals in the pool of parents + offspring; 1 => Selection Method in a pool of parents and offspring)
 //DEFAULT Params DOUBLE
@@ -38,11 +38,10 @@ typedef struct GPStruct* GP;
 [3] - Tipo de Mutação
 [4] - Tamanho da Mutação(Somente para Mutação Tipo 1)
 [5] - Tipo de Seleção
-[6] - Número de Individuos selecionados para Reprodução/Crossover
-[7] - Números de Individuos observados em um Round de Tournament(Somente para seleção Tournament)
-[8] - Tipo de Substituição na população
+[6] - Números de Individuos observados em um Round de Tournament(Somente para seleção Tournament)
+[7] - Tipo de Substituição na população
+[8] - 
 [9] - 
-[10] - 
 .
 .
 .	
@@ -61,7 +60,7 @@ typedef struct GPStruct* GP;
 GP new_gp(Training t, int integer_parameters[TOTAL_INT_PARAMETER_SIZE], double double_parameters[TOTAL_DOUBLE_PARAMETER_SIZE]);
 
 //Executa o processo de gp dada as configurações atuais
-void run_gp(GP gp);
+Individual run_gp(GP gp);
 
 //Apaga a instancia de GP
 void delete_gp(GP gp);

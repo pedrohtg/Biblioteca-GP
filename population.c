@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include "training.h"
 #include "individual.h"
 #include "population.h"
 
@@ -12,7 +13,7 @@ struct PopStruct{
 
 //Cria uma nova população com tamanho max. = size
 Population new_population(int size){
-	Popuplation p = malloc(sizeof(struct PopStruct));
+	Population p = malloc(sizeof(struct PopStruct));
 	p->max_size = size;
 
 	Individual* arr = malloc(size * sizeof(Individual));
@@ -27,7 +28,7 @@ void initialize_population(Population p, int ind_max_height, Training t){
 	int i;
 	for(i = 0; i < p->max_size; i++){
 		p->array[i] = new_individual(ind_max_height,t);
-		p->array[i]->id = i;
+		set_id(p->array[i], i);
 	}
 	p->size = p->max_size;
 }
@@ -74,7 +75,7 @@ int size_population(Population p){
 void insert_population(Population p, Individual i){
 	if(p->size < p->max_size){
 		p->array[p->size] = i;
-		p->array[p->size]->id = p->size;
+		set_id(p->array[p->size], p->size);
 		p->size++;
 	}
 	else{

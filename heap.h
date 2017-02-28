@@ -66,11 +66,11 @@ iterator right_child(Heap h, iterator x);
 int height_iterator(iterator x);
 
 //Insere o inteiro v no nó i
-//OBS : Sobreescreve caracteres já adcionados.
+//OBS : Sobreescreve valores já adcionados.
 void heap_insert(Heap h, int v, iterator i);
 
 //Insere uma subtree de sub, com raiz em sub_root, no nó i do heap h
-//OBS : Sobreescreve caracteres já adcionados.
+//OBS : Apaga a subarvore com raiz em i, para inserir a nova 
 void heap_insert_subtree(Heap h, Heap sub, iterator i, iterator sub_root);
 
 //Retorna a subtree de h com raiz r

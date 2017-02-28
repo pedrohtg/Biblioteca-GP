@@ -32,12 +32,12 @@ void random_init(Training t, Individual i, int max_height, int actual_height, it
 			int op = random_operation(t);
 			if(is_simple(op)) {
 				insert_node(i, op, pos);
-				random_init(t,max_height,actual_height+1, left_child(i->tree,pos));
+				random_init(t,i,max_height,actual_height+1, left_child(i->tree,pos));
 			}
 			else{
 				insert_node(i, op, pos);
-				random_init(t,max_height,actual_height+1, left_child(i->tree,pos));
-				random_init(t,max_height,actual_height+1, right_child(i->tree,pos));
+				random_init(t,i,max_height,actual_height+1, left_child(i->tree,pos));
+				random_init(t,i,max_height,actual_height+1, right_child(i->tree,pos));
 			}
 		}
 	}
@@ -66,8 +66,18 @@ void set_fitness(Individual i, double fit){
 }
 
 //Retorna o fitness do individuo
-int get_fitness(Individual i){
+double get_fitness(Individual i){
 	return i->fitness;
+}
+
+//Altera o id do individuo
+void set_id(Individual i, int id){
+	i->id = id;
+}
+
+//Retorna o id do individuo
+int get_id(Individual i){
+	return i->id;
 }
 
 //Retorna a altura do individuo
@@ -128,7 +138,7 @@ int valid_node(Individual i, iterator pos){
 	return use(i->tree,pos);
 }
 
-//Retorna o valor do nó n no invidiuo
+//Retorna o valor do nó pos no invidiuo
 int node_value(Individual i, iterator pos){
 	return value(i->tree,pos);
 }
@@ -194,7 +204,7 @@ void swap_subtree(Individual i1, iterator r1, Indivual i2, iterator r2){
 void print_individual(Individual i){
 	int h = 0;
 	if(!heap_empty(i->tree)){
-		for(iterator x = begin(i->tree); x != end(i->tree); x = next(x)){
+		for(iterator x = begin(i->tree); x != end(i->tree); x = next(i->tree,x)){
 			printf("(%d)", parent(x));
 
 			if(is_operation(x)) printf("%c\t",convert_operation_simbol(value(x)));
