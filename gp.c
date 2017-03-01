@@ -200,9 +200,9 @@ Population tournament_pool(Population p, Population l, int rounds, int round_siz
 		}
 
 		if(best < size_p)
-			insert_population(ret,get_individual(p,best));
+			insert_population(ret,copy_individual(get_individual(p,best)));
 		else
-			insert_population(ret,get_individual(l,best - size_p));
+			insert_population(ret,copy_individual(get_individual(l,best - size_p)));
 	}
 
 	return ret;
@@ -262,13 +262,13 @@ Population select_best_pool(Population p, Population l, int n){
 		}
 
 		if(best_l == -1 || b_fit_p > b_fit_l){
-			insert_population(ret, get_individual(p, best_p));
+			insert_population(ret, copy_individual(get_individual(p, best_p)));
 			get_p = 1;
 			get_l = 0;
 			v[best_p] = 1;
 		}
 		else{
-			insert_population(ret, get_individual(l, best_l));
+			insert_population(ret, copy_individual(get_individual(l, best_l)));
 			get_p = 0;
 			get_l = 1;
 			v[best_l + size_p] = 1;
