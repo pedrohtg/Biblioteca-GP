@@ -1,7 +1,8 @@
 #ifndef INDIVIDUAL_H_
 #define INDIVIDUAL_H_
 
-typedef struct IndStruct* Indvidual;
+typedef struct HeapStruct* Heap;
+typedef struct IndStruct* Individual;
 typedef struct TrainingStruct* Training;
 typedef int iterator;
 
@@ -57,7 +58,7 @@ Individual copy_individual(Individual i);
 void delete_individual(Individual i);
 
 //Troca as subtrees dos individuos i1 e i2, com raizes r1 e r2, respectivamente
-void swap_subtree(Individual i1, iterator r1, Indivual i2, iterator r2);
+void swap_subtree(Individual i1, iterator r1, Individual i2, iterator r2);
 
 //Imprime o individuo na tela
 void print_individual(Individual i);

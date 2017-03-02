@@ -1,11 +1,8 @@
 CC			= gcc
 CP			= g++ -std=c++11
-OBJC		= main.o heap.o
-OBJD		= mainD.o heapP.o
-LINKOBJC	= main.o heap.o
-LINKOBJB	= mainD.o heapP.o
+OBJC		= main.o heap.o individual.o population.o training.o gp.o utils.o
+LINKOBJC	= main.o heap.o individual.o population.o training.o gp.o utils.o
 BINC		= main.exe
-BIND		= main_T.exe
 
 all: $(BINC)
 
@@ -14,29 +11,29 @@ cp: $(BIND)
 $(BINC): $(OBJC)
 	$(CC) $(LINKOBJC) -o $(BINC) -lm
 
-$(BIND): $(OBJD)
-	$(CP) $(LINKOBJD) -o $(BIND) -lm 
-
-mainDB.o: main.c
-	$(CC) -c -g -o mainDB.o main.c
-
-pqueueDB.o: pqueue.c
-	$(CC) -c -g -o pqueueDB.o pqueue.c
-
 debug: $(OBJCDB)
 	$(CC) -g -o $(BINC) $(LINKOBJCDB)
 
-main.o: maic_test.c
-	$(CC) -c maic_test.c -o main.o
+main.o: main_test.c
+	$(CC) -c main_test.c -o main.o
 
-mainD.o: test.cpp
-	$(CP) -c test.cpp -o mainD.o
+heap.o: heap.c
+	$(CC) -c heap.c -o heap.o -lm
 
-heap.o: char_heap.c
-	$(CC) -c char_heap.c -o heap.o -lm
+individual.o: individual.c
+	$(CC) -c individual.c -o individual.o -lm
 
-heapP.o: char_heap.c
-	$(CP) -c char_heap.c -o heap.o -lm
+population.o: population.c
+	$(CC) -c population.c -o population.o -lm
+
+training.o: training.c
+	$(CC) -c training.c -o training.o -lm
+
+gp.o: gp.c
+	$(CC) -c gp.c -o gp.o -lm
+
+utils.o: utils.c
+	$(CC) -c utils.c -o utils.o -lm
 
 clean:
 	rm *o $(BINC)

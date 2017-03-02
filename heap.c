@@ -154,7 +154,7 @@ void heap_insert(Heap h, int v, iterator i){
 		if(use(h,i)){
 			h->array[i] = v;
 		}
-		else if(i == heap_root(h) || use(parent(i))){
+		else if(i == heap_root(h) || use(h,parent(i))){
 			h->array[i] = v;
 			h->size++;
 
@@ -182,8 +182,8 @@ void aux_subtree(Heap h, Heap sub, iterator h_actual, iterator sub_actual){
 	iterator left_sub = left_child(sub,sub_actual);
 	iterator right_sub = right_child(sub,sub_actual);
 
-	if(use(sub,left_sub)) aux_subtree(h,sub,count,left_child(h,h_actual),left_sub);
-	if(use(sub,right_sub)) aux_subtree(h,sub,count,right_child(h,h_actual),right_sub);
+	if(use(sub,left_sub)) aux_subtree(h,sub,left_child(h,h_actual),left_sub);
+	if(use(sub,right_sub)) aux_subtree(h,sub,right_child(h,h_actual),right_sub);
 }
 
 //Insere uma subtree de sub, com raiz em sub_root, no nó i do heap h
@@ -199,7 +199,7 @@ void heap_insert_subtree(Heap h, Heap sub, iterator i, iterator sub_root){
 
 	heap_remove(h, i);
 
-	if(i == heap_root(h) || use(parent(i))){
+	if(i == heap_root(h) || use(h,parent(i))){
 		aux_subtree(h, sub, i, sub_root);
 	}
 }

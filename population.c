@@ -38,9 +38,13 @@ void initialize_population(Population p, int ind_max_height, Training t){
 Individual best_individual(Population p){
 	int i;
 	int best = 0;
+	double b_fit = get_fitness(p->array[0]);
+	double fit;
 	for(i = 1; i < p->size; i++){
-		if(p->array[i]->fitness >= p->array[best]->fitness){
+		fit = get_fitness(p->array[i]);
+		if(fit >= b_fit){
 			best = i;
+			b_fit = fit;
 		}
 	}
 
@@ -51,7 +55,7 @@ Individual best_individual(Population p){
 void eval_population(Population p, Training t){
 	int i;
 	for(i = 0; i < p->size; i++){
-		p[i]->fitness = fitness(p[i],t);
+		set_fitness(p->array[i], fitness(p->array[i],t));
 	}
 }
 
@@ -92,7 +96,7 @@ void pop_population(Population p){
 //Apaga todos os individuos de uma população p
 void clear_population(Population p){
 	int i;
-	for(int i = 0; i < p->size; i++){
+	for(i = 0; i < p->size; i++){
 		delete_individual(p->array[i]);
 	}
 	p->size = 0;
@@ -112,11 +116,12 @@ void delete_population(Population p){
 
 double fitness(Individual i, Training t){
 	int k;
+	int data_size = training_size(t);
 	double sum = 0.0;
 	double val;
 	double out;
 	double dif;
-	for(k = 0; k < t->data_size; k++){
+	for(k = 0; k < data_size; k++){
 		val = avaliate_individual(i,t,k);
 		out = output_value(t,k);
 		dif = val - out;

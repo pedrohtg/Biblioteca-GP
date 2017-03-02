@@ -1,8 +1,8 @@
 #ifndef GP_H_
 #define GP_H_
 
-typedef PopStruct* Population;
-typedef struct IndStruct* Indvidual;
+typedef struct PopStruct* Population;
+typedef struct IndStruct* Individual;
 typedef struct TrainingStruct* Training;
 typedef struct GPStruct* GP;
 

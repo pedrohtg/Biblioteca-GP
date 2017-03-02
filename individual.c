@@ -3,9 +3,10 @@
 #include <time.h>
 #include <math.h>
 #include <float.h>
-#include "int_heap.h"
+#include "heap.h"
 #include "individual.h"
 #include "training.h"
+#include "utils.h"
 
 #define INF DBL_MIN
 
@@ -19,12 +20,12 @@ struct IndStruct{
 void random_init(Training t, Individual i, int max_height, int actual_height, iterator pos){
 	if(!valid(i->tree, pos)) return ;
 
-	srand(time(NULL));
+	init_genrand(time(NULL));
 	if(actual_height >= max_height){
 		insert_node(i,random_variable(t), pos);
 	}
 	else{
-		double roll = (double)rand() / (RAND_MAX + 1.0);
+		double roll = genrand_res53();
 		double prob = 1.0 / ( max_height - actual_height + 0.3);
 
 		if(roll <= prob) insert_node(i,random_variable(t), pos);
@@ -54,7 +55,7 @@ Individual new_individual(int max_height, Training t){
 	i->mx_height = max_height;
 
 	// random initialize heap
-	random_init(i,t, max_height, 0, 0);
+	random_init(t,i, max_height, 0, 0);
 	//
 
 	return i;
@@ -145,7 +146,7 @@ int node_value(Individual i, iterator pos){
 
 //Retorna um iterator para um nó aleatório
 iterator random_node(Individual i){
-	srand(time(NULL));
+	init_genrand(time(NULL));
 	
 	int size = heap_size(i->tree);
 	double prob;
@@ -156,7 +157,7 @@ iterator random_node(Individual i){
 
 	int k;
 	for(k = 1;k <= size && it != end(i->tree); k++, it = next(i->tree,it)){
-		double roll = (double)rand() / (RAND_MAX + 1.0);
+		double roll = genrand_res53();
 		prob = 1/(double)k;
 		if(roll <= prob) ret = it;
 	}
@@ -191,7 +192,7 @@ void delete_individual(Individual i){
 }
 
 //Troca as subtrees dos individuos i1 e i2, com raizes r1 e r2, respectivamente
-void swap_subtree(Individual i1, iterator r1, Indivual i2, iterator r2){
+void swap_subtree(Individual i1, iterator r1, Individual i2, iterator r2){
 	Heap aux = get_subtree(i1->tree, r1);
 	heap_insert_subtree(i1->tree, i2->tree, r1, r2);
 	heap_insert_subtree(i2->tree, aux, r2, 0);
@@ -203,17 +204,18 @@ void swap_subtree(Individual i1, iterator r1, Indivual i2, iterator r2){
 //Formato : (Nó pai)valor do nó atual 
 void print_individual(Individual i){
 	int h = 0;
+	iterator x;
 	if(!heap_empty(i->tree)){
-		for(iterator x = begin(i->tree); x != end(i->tree); x = next(i->tree,x)){
-			printf("(%d)", parent(x));
-
-			if(is_operation(x)) printf("%c\t",convert_operation_simbol(value(x)));
-			else printf("x%d\t",value(x));
-			
-			if(height_iterator(x) > h || h == 0){
+		for(x = begin(i->tree); x != end(i->tree); x = next(i->tree,x)){
+			if(height_iterator(x) > h){
 				printf("\n");
 				h++;
 			}
+
+			printf("(%d)", parent(x));
+
+			if(is_operation(value(i->tree,x))) printf("%c\t",convert_operation_simbol(value(i->tree,x)));
+			else printf("x%d\t",value(i->tree,x));			
 		}
 	}
 	else{

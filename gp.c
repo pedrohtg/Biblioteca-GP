@@ -1,12 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include <random.h>
 #include <float.h>
 #include "population.h"
 #include "individual.h"
 #include "gp.h"
 #include "training.h"
+#include "utils.h"
 
 struct GPStruct{
 	Training tr;
@@ -44,7 +44,7 @@ GP new_gp(Training t, int integer_parameters[TOTAL_INT_PARAMETER_SIZE], double d
 	// ----------------------------------------------
 
 	// Set DOUBLE Parameters -------------------------------	
-	gp->crossover_probabilty = double_parameters[0] > 0 ? double_parameters[0] : DEFAULT_crossover_probabilty;				
+	gp->crossover_probabilty = double_parameters[0] > 0 ? double_parameters[0] : DEFAULT_crossover_probability;				
 	gp->mutation_probability = double_parameters[1] > 0 ? double_parameters[1] : DEFAULT_mutation_probability;				
 	// ----------------------------------------------
 
@@ -60,7 +60,7 @@ GP new_gp(Training t, int integer_parameters[TOTAL_INT_PARAMETER_SIZE], double d
 //Executa o processo de gp dada as configurações atuais
 Individual run_gp(GP gp){
 	//init
-	if(!initialized(gp->t)){
+	if(!initialized(gp->tr)){
 		printf("Error: The training object wasn't correctly initialized.\n");
 		return;
 	}
@@ -76,8 +76,8 @@ Individual run_gp(GP gp){
 	offspring = new_population(2*cr_size);
 	
 	for(g = 0; g < gp->number_gen; g++){
-		srand(time(NULL));
-		eval_population(gp->p);
+		init_genrand(time(NULL));
+		eval_population(gp->p, gp->tr);
 		//selection method --> TODO
 		selected = tournament(gp->p, cr_size, gp->tournament_round_size);
 
@@ -89,9 +89,9 @@ Individual run_gp(GP gp){
 		}
 
 		for(i = 0; i < cr_size; i++){
-			int r = rand()%cr_size;
+			int r = genrand_int32()%cr_size;
 
-			while(r == i || paired[r] == i) r = rand()%cr_size;
+			while(r == i || paired[r] == i) r = genrand_int32()%cr_size;
 
 			crossover(get_individual(selected,i), get_individual(selected,r), offspring);
 			paired[i] = r;
@@ -100,9 +100,9 @@ Individual run_gp(GP gp){
 
 		//Mutation
 		for(j = 0; j < mt_size; j++){
-			int r = rand()%(2*cr_size);
+			int r = genrand_int32()%(2*cr_size);
 
-			while(mutated[r] == 0) r = rand%(2*cr_size);
+			while(mutated[r] == 0) r = genrand_int32()%(2*cr_size);
 
 			mutation(gp, get_individual(offspring, r));
 			mutated[r] = 0;
@@ -141,7 +141,7 @@ void delete_gp(GP gp){
 
 //Realiza uma seleção por torneio
 Population tournament(Population p, int rounds, int round_size){
-	srand(time(NULL));
+	init_genrand(time(NULL));
 
 	Population ret = new_population(rounds);
 	int i,k;
@@ -149,15 +149,15 @@ Population tournament(Population p, int rounds, int round_size){
 	int chosen,best;
 	double best_fit,fit;
 
-	chosen_id = rand() % size;
+	chosen = genrand_int32() % size;
 
-	best = chosen_id;
-	best_fit = get_fitness(get_individual(p,chosen_id));
+	best = chosen;
+	best_fit = get_fitness(get_individual(p,chosen));
 
 	for(i = 0; i < rounds; i++){
 
 		for(k = 0; k < round_size; k++){
-			chosen = rand() % size;
+			chosen = genrand_int32() % size;
 			fit = get_fitness(get_individual(p,chosen));
 			if(fit >= best_fit){
 				best = chosen;
@@ -173,17 +173,17 @@ Population tournament(Population p, int rounds, int round_size){
 
 //Realiza uma seleção por torneio em um pool formado pela população p + população l
 Population tournament_pool(Population p, Population l, int rounds, int round_size){
-	srand(time(NULL));
+	init_genrand(time(NULL));
 
 	Population ret = new_population(rounds);
 	int i,k;
 	int size_p = size_population(p);
 	int size_l = size_population(l);
 	int size = size_p + size_l;
-	int chosen,best,best_mod;
+	int chosen, chosen_id,best,best_mod;
 	double best_fit,fit;
 
-	chosen_id = rand() % size;
+	chosen_id = genrand_int32() % size;
 
 	best = chosen_id;
 	best_fit = chosen_id < size_p ? get_fitness(get_individual(p,chosen_id)) : get_fitness(get_individual(l,(chosen_id - size_p)));
@@ -191,7 +191,7 @@ Population tournament_pool(Population p, Population l, int rounds, int round_siz
 	for(i = 0; i < rounds; i++){
 
 		for(k = 0; k < round_size; k++){
-			chosen = rand() % size;
+			chosen = genrand_int32() % size;
 			fit = chosen < size_p ? get_fitness(get_individual(p,chosen)) : get_fitness(get_individual(l,(chosen - size_p)));
 			if(fit >= best_fit){
 				best = chosen;
@@ -219,7 +219,7 @@ Population select_best_pool(Population p, Population l, int n){
 		return NULL;
 	}
 
-	int v* = calloc(size_p + size_l, sizeof(int));
+	int *v = calloc(size_p + size_l, sizeof(int));
 
 	Population ret = new_population(n);
 	int best_p, best_l;
@@ -284,7 +284,7 @@ Population select_best_pool(Population p, Population l, int n){
 
 //Reproduction Methods: Crossovers and Mutations
 void crossover(Individual i1, Individual i2, Population offspring){
-	srand(time(NULL));
+	init_genrand(time(NULL));
 	Individual k1 = copy_individual(i1);
 	Individual k2 = copy_individual(i2);
 
@@ -302,12 +302,12 @@ void crossover(Individual i1, Individual i2, Population offspring){
 
 
 	swap_subtree(k1, r1, k2 ,r2);
-	insert_population(k1);
-	insert_population(k2);
+	insert_population(offspring,k1);
+	insert_population(offspring,k2);
 }
 
 void mutation(GP gp, Individual i){
-	srand(time(NULL));
+	init_genrand(time(NULL));
 	if(gp->mutation_type == 1){
 		int x = 0;
 		for(;x < gp->mutation_size; x++){
@@ -331,7 +331,7 @@ void mutation(GP gp, Individual i){
 	}
 
 	else if(gp->mutation_type == 2){
-		int new_subtree_height = 1 + (rand() % (gp->ind_max_height/2));
+		int new_subtree_height = 1 + (genrand_int32() % (gp->ind_max_height/2));
 		Individual sub = new_individual(new_subtree_height, gp->tr);
 
 		iterator chosen = random_node(i);

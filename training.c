@@ -4,15 +4,19 @@
 #include <float.h>
 #include <stdarg.h>
 #include "training.h"
+#include "utils.h"
 //------------------------------------------------------------
 //Private section --------------------------------------------
 // OPERATION FUNCTIONS
 #define TOTAL_OP_NUMBER 7
 
+typedef double (*function_simple)(double);
+typedef double (*function_compos)(double, double);
+
 double add(double a, double b);
 double sub(double a, double b);
 double mux(double a, double b);
-double div(double a, double b);
+double frc(double a, double b);
 double pot(double a, double b);
 double sqr(double a);
 double mod(double a);
@@ -20,14 +24,14 @@ double mod(double a);
 // Auxiliar functions -----
 //int get_input_position(char in, Training t);
 int convert_simbol_operation(char c);
-double (*fun)(double) op_func_simple(int op);
-double (*fun)(double, double) op_func_composite(int op);
+function_simple op_func_simple(int op);
+function_compos op_func_composite(int op);
 int op_pos(int op);
 // ------------------------
 // ------------------------
 
 struct TrainingStruct{
-	int operation[TOTAL_OP_NUMBER];	// Representa se as operações {+, -, *, /,  [a^b]exponencial(^), square_root(√) modulo(#)} são validas, respectivamente;
+	int operation[TOTAL_OP_NUMBER];	// Representa se as operações {+, -, *, /,  [a^b]exponencial(^), square_root(@) modulo(#)} são validas, respectivamente;
 	int op_number;		// Numero de operações ativadas. 
 	int in_number;		// Numero de inputs; As variaveis são representadas de 1 até in_number.
 	double** data;		// Matriz que armazena os valores das instancias de treinamento
@@ -46,6 +50,11 @@ Training new_training(int input_number){
 	t->data_size = 0;
 
 	return t;
+}
+
+//Retorna o número de casos do objeto de Training
+int training_size(Training t){
+	return t->data_size;
 }
 
 //Apaga um objeto de Training;
@@ -75,7 +84,7 @@ void set_operations(Training t, int number, ...){
 	for(i = 0; i < TOTAL_OP_NUMBER; i++) t->operation[i] = 0;
 
 	for(i = 0; i < number; i++){
-		c = va_arg(v,char);
+		c = (char)va_arg(v,int);
 		pos = convert_simbol_operation(c);
 		if(pos >= 0 && pos < TOTAL_OP_NUMBER){
 			if(t->operation[pos] == 0) t->op_number++;
@@ -97,7 +106,7 @@ void initialize_data(char* filename, Training t){
 	}
 
 	int n, m;
-	fscanf(fp, "%d %d",n,m);
+	fscanf(fp, "%d %d",&n,&m);
 	if(n != t->in_number){
 		printf("Error: Incompatible number of variables in file and configured in the program.\n");
 		//printf("Erro: O número de váriaveis do arquivo é diferente do configurado no programa.\n");
@@ -116,7 +125,7 @@ void initialize_data(char* filename, Training t){
 	for(i = 0; i < m; i++){
 		t->data[i] = malloc((n+1)*sizeof(double));
 		for(j = 0; j < n+1; j++){
-			fscanf(fp,"%lf", t->data[i][j]);
+			fscanf(fp,"%lf", &t->data[i][j]);
 		}
 	}
 
@@ -144,19 +153,19 @@ int is_simple(int k){
 
 //Retorna uma operação aleatória da Entidade
 int random_operation(Training t){
-	srand(time(NULL));
+	init_genrand(time(NULL));
 
-	int op = rand() % TOTAL_OP_NUMBER;
-	while(!t->operation[op]) op = rand() % TOTAL_OP_NUMBER;
+	int op =  genrand_int32() % TOTAL_OP_NUMBER;
+	while(!t->operation[op]) op =  genrand_int32() % TOTAL_OP_NUMBER;
 
 	return ((-1)*op - 1);
 }
 
 //Retorna uma operação SIMPLES aleatória da Entidade
 int random_simple_operation(Training t){
-	srand(time(NULL));
+	init_genrand(time(NULL));
 	int coin = rand()%2;
-	int sq = convert_simbol_operation('√');
+	int sq = convert_simbol_operation('@');
 	int md = convert_simbol_operation('#');
 	if(t->operation[sq] && coin) return ((-1)*sq - 1);
 	else if(t->operation[md]) return ((-1)*md - 1);
@@ -169,7 +178,7 @@ int random_simple_operation(Training t){
 
 //Retorna uma operação COMPOSTA aleatória da Entidade
 int random_composite_operation(Training t){
-	srand(time(NULL));
+	init_genrand(time(NULL));
 	int sum = 0;
 	int i;
 	int pt = convert_simbol_operation('^');
@@ -180,8 +189,8 @@ int random_composite_operation(Training t){
 		return random_operation(t);
 	}
 	else{
-		int op = rand() % pt;
-		while(!t->operation[op]) op = rand() % pt;
+		int op =  genrand_int32() % pt;
+		while(!t->operation[op]) op =  genrand_int32() % pt;
 
 		return op;
 	}
@@ -189,10 +198,12 @@ int random_composite_operation(Training t){
 
 //Retorna uma varivel/constante aleatória da Entidade
 int random_variable(Training t){
-	srand(time(NULL));
+	init_genrand(time(NULL));
 
-	double r = rand()/(1.0 + RAND_MAX); 
-    return (r * (t->in_number + 1)) + 1;
+	double r =  genrand_res53();
+	int ret = (r * (t->in_number + 1)) + 1;
+	if(ret > t->in_number) ret = t->in_number;
+    return ret;
 }
 
 //Retorna o valor de um input em uma amostra/caso do dataset
@@ -234,7 +245,7 @@ double mux(double a, double b){
 	return a*b;
 }
 
-double div(double a, double b){
+double frc(double a, double b){
 	if(b == 0) return DBL_MAX;
 	return a/b;
 }
@@ -283,7 +294,7 @@ char convert_operation_simbol(int op){
 			return '^';
 			break;
 		case -6: 
-			return '√';
+			return '@';
 			break;
 		case -7: 
 			return '#';
@@ -310,7 +321,7 @@ int convert_simbol_operation(char op){
 		case '^': 
 			return 4;
 			break;
-		case '√': 
+		case '@': 
 			return 5;
 			break;
 		case '#': 
@@ -321,7 +332,7 @@ int convert_simbol_operation(char op){
 	}
 }
 
-double (*fun)(double) op_func_simple(int op){
+function_simple op_func_simple(int op){
 	switch(op){
 		case -6: 
 			return &sqr;
@@ -332,7 +343,7 @@ double (*fun)(double) op_func_simple(int op){
 	}
 }
 
-double (*fun)(double, double) op_func_composite(int op){
+function_compos op_func_composite(int op){
 	switch(op){
 		case -1: 
 			return &add;
@@ -344,7 +355,7 @@ double (*fun)(double, double) op_func_composite(int op){
 			return &mux;
 			break;
 		case -4: 
-			return &div;
+			return &frc;
 			break;
 		case -5: 
 			return &pot;

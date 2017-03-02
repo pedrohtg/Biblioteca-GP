@@ -2,7 +2,7 @@
 #define POPULATION_H_
 
 typedef struct PopStruct* Population;
-typedef struct IndStruct* Indvidual;
+typedef struct IndStruct* Individual;
 typedef struct TrainingStruct* Training;
 
 //Cria uma nova população com tamanho max. size

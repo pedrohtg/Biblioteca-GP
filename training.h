@@ -6,6 +6,9 @@ typedef struct TrainingStruct* Training;
 //Cria um novo objeto para Training;
 Training new_training(int input_number);
 
+//Retorna o número de casos do objeto de Training
+int training_size(Training t);
+
 //Apaga o objeto de Training
 void delete_training(Training t);
 
@@ -41,16 +44,16 @@ int random_composite_operation(Training t);
 int random_variable(Training t);
 
 //Retorna o valor de um input em uma amostra/caso do dataset
-double input_value(char in, Training t, int sample);
+double input_value(int in, Training t, int sample);
 
 //Retorna o valor de output de uma amostra/caso do dataset
 double output_value(Training t, int sample);
 
 //Retorna o valor da operação simples para o dado input
-double simple_value(char op, double input);
+double simple_value(int op, double input);
 
 //Retorna o valor da operação composta para o dado input
-double composite_value(char op, double input1, double input2);
+double composite_value(int op, double input1, double input2);
 
 //Converte a representação numerica para a representação simbólica de uma operação
 char convert_operation_simbol(int op);
