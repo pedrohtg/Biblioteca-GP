@@ -20,7 +20,7 @@ struct IndStruct{
 void random_init(Training t, Individual i, int max_height, int actual_height, iterator pos){
 	if(!valid(i->tree, pos)) return ;
 
-	init_genrand(time(NULL));
+	// init_genrand(time(NULL));
 	if(actual_height >= max_height){
 		insert_node(i,random_variable(t), pos);
 	}
@@ -146,7 +146,7 @@ int node_value(Individual i, iterator pos){
 
 //Retorna um iterator para um nó aleatório
 iterator random_node(Individual i){
-	init_genrand(time(NULL));
+	// init_genrand(time(NULL));
 	
 	int size = heap_size(i->tree);
 	double prob;
@@ -200,12 +200,25 @@ void swap_subtree(Individual i1, iterator r1, Individual i2, iterator r2){
 	delete_heap(aux);
 }
 
+void print_aux(Heap h, iterator pos){
+	//if(pos != heap_root(h)) printf(" ");
+	if(is_operation(value(h,pos))) printf("%c\t",convert_operation_simbol(value(h,pos)));
+	else printf("x%d\t",value(h,pos));
+
+
+	if(use(h,left_child(h,pos))) print_aux(h,left_child(h,pos));
+	if(use(h,right_child(h,pos))) print_aux(h,right_child(h,pos));
+}
+
 //Imprime o individuo na tela
-//Formato : (Nó pai)valor do nó atual 
+//Formato : Notação Polonesa( Notação Infixa )
 void print_individual(Individual i){
 	int h = 0;
 	iterator x;
 	if(!heap_empty(i->tree)){
+		printf("Notação Infixa\n");
+		print_aux(i->tree, heap_root(i->tree));
+		printf("\n\nTHIS\n");
 		for(x = begin(i->tree); x != end(i->tree); x = next(i->tree,x)){
 			if(height_iterator(x) > h){
 				printf("\n");

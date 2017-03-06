@@ -76,7 +76,7 @@ Individual run_gp(GP gp){
 	offspring = new_population(2*cr_size);
 	
 	for(g = 0; g < gp->number_gen; g++){
-		init_genrand(time(NULL));
+		// init_genrand(time(NULL));
 		eval_population(gp->p, gp->tr);
 		//selection method --> TODO
 		selected = tournament(gp->p, cr_size, gp->tournament_round_size);
@@ -141,7 +141,7 @@ void delete_gp(GP gp){
 
 //Realiza uma seleção por torneio
 Population tournament(Population p, int rounds, int round_size){
-	init_genrand(time(NULL));
+	// init_genrand(time(NULL));
 
 	Population ret = new_population(rounds);
 	int i,k;
@@ -173,7 +173,7 @@ Population tournament(Population p, int rounds, int round_size){
 
 //Realiza uma seleção por torneio em um pool formado pela população p + população l
 Population tournament_pool(Population p, Population l, int rounds, int round_size){
-	init_genrand(time(NULL));
+	// init_genrand(time(NULL));
 
 	Population ret = new_population(rounds);
 	int i,k;
@@ -284,7 +284,7 @@ Population select_best_pool(Population p, Population l, int n){
 
 //Reproduction Methods: Crossovers and Mutations
 void crossover(Individual i1, Individual i2, Population offspring){
-	init_genrand(time(NULL));
+	// init_genrand(time(NULL));
 	Individual k1 = copy_individual(i1);
 	Individual k2 = copy_individual(i2);
 
@@ -307,7 +307,7 @@ void crossover(Individual i1, Individual i2, Population offspring){
 }
 
 void mutation(GP gp, Individual i){
-	init_genrand(time(NULL));
+	// init_genrand(time(NULL));
 	if(gp->mutation_type == 1){
 		int x = 0;
 		for(;x < gp->mutation_size; x++){

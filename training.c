@@ -8,7 +8,9 @@
 //------------------------------------------------------------
 //Private section --------------------------------------------
 // OPERATION FUNCTIONS
-#define TOTAL_OP_NUMBER 7
+#define TOTAL_OP_NUMBER 11
+#define TOTAL_OP_SIMPLE 5
+#define TOTAL_OP_COMPOS 6
 
 typedef double (*function_simple)(double);
 typedef double (*function_compos)(double, double);
@@ -18,8 +20,12 @@ double sub(double a, double b);
 double mux(double a, double b);
 double frc(double a, double b);
 double pot(double a, double b);
+double loga(double a, double b);
 double sqr(double a);
 double mod(double a);
+double sena(double a);
+double cosa(double a);
+double expo(double a);
 // ------------------------
 // Auxiliar functions -----
 //int get_input_position(char in, Training t);
@@ -31,7 +37,14 @@ int op_pos(int op);
 // ------------------------
 
 struct TrainingStruct{
-	int operation[TOTAL_OP_NUMBER];	// Representa se as operações {+, -, *, /,  [a^b]exponencial(^), square_root(@) modulo(#)} são validas, respectivamente;
+	int operation[TOTAL_OP_NUMBER];
+	/*Representa se as operações :
+		Compostas : [ 0 - 5 ]
+		+, -, *, /, [a^b]exponencial(^), [log_a b]logaritmo(l)
+		Simples   : [ 6 - 10 ]
+		raiz quadrada(@), modulo(#), [seno](s), [cosseno](c), [e^a](e)
+		são validas, respectivamente;
+	*/
 	int op_number;		// Numero de operações ativadas. 
 	int in_number;		// Numero de inputs; As variaveis são representadas de 1 até in_number.
 	double** data;		// Matriz que armazena os valores das instancias de treinamento
@@ -40,6 +53,9 @@ struct TrainingStruct{
 
 //Cria um novo objeto para Training;
 Training new_training(int input_number){
+	srand(time(NULL));
+	init_genrand(time(NULL));
+
 	Training t = malloc(sizeof(struct TrainingStruct));
 	t->in_number = input_number;
 
@@ -140,20 +156,20 @@ int initialized(Training t){
 //Determina se tal Representante k, é uma operação ou variavel/constante
 //OBS.: Se k é uma operação então assume-se que é válida
 int is_operation(int k){
-	if(-7 <= k && k <= - 1) return 1;
+	if(-TOTAL_OP_NUMBER <= k && k <= -1) return 1;
 	else return 0;
 }
 
 //Determina se tal representante k é uma operação simples(atua sobre uma variavel) ou composta(atua sobre duas variaveis)
 //Obs: Assume que k representa uma operação
 int is_simple(int k){
-	if(k == -6 || k == -7) return 1;
+	if( -TOTAL_OP_NUMBER <= k && k <= -TOTAL_OP_COMPOS - 1) return 1;
 	return 0;
 }
 
 //Retorna uma operação aleatória da Entidade
 int random_operation(Training t){
-	init_genrand(time(NULL));
+	// init_genrand(time(NULL));
 
 	int op =  genrand_int32() % TOTAL_OP_NUMBER;
 	while(!t->operation[op]) op =  genrand_int32() % TOTAL_OP_NUMBER;
@@ -163,25 +179,29 @@ int random_operation(Training t){
 
 //Retorna uma operação SIMPLES aleatória da Entidade
 int random_simple_operation(Training t){
-	init_genrand(time(NULL));
-	int coin = rand()%2;
-	int sq = convert_simbol_operation('@');
-	int md = convert_simbol_operation('#');
-	if(t->operation[sq] && coin) return ((-1)*sq - 1);
-	else if(t->operation[md]) return ((-1)*md - 1);
-	else if(t->operation[sq]) return ((-1)*sq - 1);
-	else{
+	// init_genrand(time(NULL));
+	int sum = 0;
+	int i;
+	for(i = TOTAL_OP_COMPOS; i < TOTAL_OP_SIMPLE; i++) sum += t->operation[i];
+
+	if(sum  == 0){
 		printf("Error: No simple operation set in this Training.\n");
 		return random_operation(t);
+	}
+	else{
+		int op =  (genrand_int32() % TOTAL_OP_SIMPLE) + TOTAL_OP_COMPOS;
+		while(!t->operation[op]) op = (genrand_int32() % TOTAL_OP_SIMPLE) + TOTAL_OP_COMPOS;
+
+		return op;
 	}
 }
 
 //Retorna uma operação COMPOSTA aleatória da Entidade
 int random_composite_operation(Training t){
-	init_genrand(time(NULL));
+	// init_genrand(time(NULL));
 	int sum = 0;
 	int i;
-	int pt = convert_simbol_operation('^');
+	int pt = TOTAL_OP_COMPOS;
 	for(i = 0; i < pt; i++) sum += t->operation[i];
 
 	if(sum  == 0){
@@ -198,7 +218,7 @@ int random_composite_operation(Training t){
 
 //Retorna uma varivel/constante aleatória da Entidade
 int random_variable(Training t){
-	init_genrand(time(NULL));
+	// init_genrand(time(NULL));
 
 	double r =  genrand_res53();
 	int ret = (r * (t->in_number + 1)) + 1;
@@ -254,12 +274,29 @@ double pot(double a, double b){
 	return pow(a,b);
 }
 
+double loga(double a, double b){
+	if(a == 0 || a == 1 || b == 0) return DBL_MAX;
+	return log(b)/log(a);
+}
+
 double sqr(double a){
 	return sqrt(a);
 }
 
 double mod(double a){
 	return fabs(a);
+}
+
+double sena(double a){
+	return sin(a);
+}
+
+double cosa(double a){
+	return cos(a);
+}
+
+double expo(double a){
+	return exp(a);
 }
 // ------------------------
 
@@ -294,10 +331,22 @@ char convert_operation_simbol(int op){
 			return '^';
 			break;
 		case -6: 
-			return '@';
+			return 'l';
 			break;
 		case -7: 
+			return '@';
+			break;
+		case -8: 
 			return '#';
+			break;
+		case -9: 
+			return 's';
+			break;
+		case -10: 
+			return 'c';
+			break;
+		case -11: 
+			return 'e';
 			break;
 		default :
 			return '.';
@@ -321,11 +370,23 @@ int convert_simbol_operation(char op){
 		case '^': 
 			return 4;
 			break;
-		case '@': 
+		case 'l': 
 			return 5;
 			break;
-		case '#': 
+		case '@': 
 			return 6;
+			break;
+		case '#': 
+			return 7;
+			break;
+		case 's': 
+			return 8;
+			break;
+		case 'c': 
+			return 9;
+			break;
+		case 'e': 
+			return 10;
 			break;
 		default :
 			return -1;
@@ -334,11 +395,20 @@ int convert_simbol_operation(char op){
 
 function_simple op_func_simple(int op){
 	switch(op){
-		case -6: 
+		case -7: 
 			return &sqr;
 			break;
-		case -7: 
+		case -8: 
 			return &mod;
+			break;
+		case -9: 
+			return &sena;
+			break;
+		case -10: 
+			return &cosa;
+			break;
+		case -11: 
+			return &expo;
 			break;
 	}
 }
@@ -359,6 +429,9 @@ function_compos op_func_composite(int op){
 			break;
 		case -5: 
 			return &pot;
+			break;
+		case -6: 
+			return &loga;
 			break;
 	}
 }
