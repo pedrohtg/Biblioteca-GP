@@ -49,3 +49,5 @@ Temporary Items
 # C/C++
 .o
 .exe
+*.o
+main.exe
