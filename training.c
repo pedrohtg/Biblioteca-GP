@@ -11,6 +11,7 @@
 #define TOTAL_OP_NUMBER 11
 #define TOTAL_OP_SIMPLE 5
 #define TOTAL_OP_COMPOS 6
+#define LOOP_LIMIT		500
 
 typedef double (*function_simple)(double);
 typedef double (*function_compos)(double, double);
@@ -56,7 +57,7 @@ Training new_training(int input_number){
 	srand(time(NULL));
 	init_genrand(time(NULL));
 
-	Training t = malloc(sizeof(struct TrainingStruct));
+	Training t = (Training)malloc(sizeof(struct TrainingStruct));
 	t->in_number = input_number;
 
 	// Default operations{+,-,*,/}
@@ -123,6 +124,7 @@ void initialize_data(char* filename, Training t){
 
 	int n, m;
 	fscanf(fp, "%d %d",&n,&m);
+	printf("%s %d %d\n", filename, n, m);
 	if(n != t->in_number){
 		printf("Error: Incompatible number of variables in file and configured in the program.\n");
 		//printf("Erro: O número de váriaveis do arquivo é diferente do configurado no programa.\n");
@@ -136,15 +138,15 @@ void initialize_data(char* filename, Training t){
 	int i,j;
 
 	t->data_size = m;
-	t->data = malloc(m*sizeof(double*));
+	t->data = (double**)malloc(m*sizeof(double*));
 
 	for(i = 0; i < m; i++){
-		t->data[i] = malloc((n+1)*sizeof(double));
+		t->data[i] = (double*)malloc((n+1)*sizeof(double));
 		for(j = 0; j < n+1; j++){
-			fscanf(fp,"%lf", &t->data[i][j]);
+			fscanf(fp,"%lf", &(t->data[i][j]));
 		}
 	}
-
+	
 	fclose(fp);
 }
 
@@ -170,9 +172,22 @@ int is_simple(int k){
 //Retorna uma operação aleatória da Entidade
 int random_operation(Training t){
 	// init_genrand(time(NULL));
-
+	int count = 0;
 	int op =  genrand_int32() % TOTAL_OP_NUMBER;
-	while(!t->operation[op]) op =  genrand_int32() % TOTAL_OP_NUMBER;
+	while(!t->operation[op] && count < LOOP_LIMIT) {
+		op =  genrand_int32() % TOTAL_OP_NUMBER;
+		count++;
+	}
+
+	if(count == LOOP_LIMIT){
+		int i;
+		for(i = 0; i < TOTAL_OP_NUMBER; i++){
+			if(t->operation[i]){
+				op = i;
+				break;
+			}
+		}
+	}
 
 	return ((-1)*op - 1);
 }
@@ -181,8 +196,9 @@ int random_operation(Training t){
 int random_simple_operation(Training t){
 	// init_genrand(time(NULL));
 	int sum = 0;
+	int count = 0;
 	int i;
-	for(i = TOTAL_OP_COMPOS; i < TOTAL_OP_SIMPLE; i++) sum += t->operation[i];
+	for(i = TOTAL_OP_COMPOS; i < TOTAL_OP_NUMBER; i++) sum += t->operation[i];
 
 	if(sum  == 0){
 		printf("Error: No simple operation set in this Training.\n");
@@ -190,9 +206,21 @@ int random_simple_operation(Training t){
 	}
 	else{
 		int op =  (genrand_int32() % TOTAL_OP_SIMPLE) + TOTAL_OP_COMPOS;
-		while(!t->operation[op]) op = (genrand_int32() % TOTAL_OP_SIMPLE) + TOTAL_OP_COMPOS;
+		while(!t->operation[op] && count < LOOP_LIMIT){
+			op = (genrand_int32() % TOTAL_OP_SIMPLE) + TOTAL_OP_COMPOS;
+			count++;
+		}
 
-		return op;
+		if(count == LOOP_LIMIT){
+			for(i = TOTAL_OP_COMPOS; i < TOTAL_OP_NUMBER; i++){
+				if(t->operation[i]){
+					op = i;
+					break;
+				}
+			}
+		}
+
+		return ((-1)*op - 1);
 	}
 }
 
@@ -200,6 +228,7 @@ int random_simple_operation(Training t){
 int random_composite_operation(Training t){
 	// init_genrand(time(NULL));
 	int sum = 0;
+	int count = 0;
 	int i;
 	int pt = TOTAL_OP_COMPOS;
 	for(i = 0; i < pt; i++) sum += t->operation[i];
@@ -210,9 +239,21 @@ int random_composite_operation(Training t){
 	}
 	else{
 		int op =  genrand_int32() % pt;
-		while(!t->operation[op]) op =  genrand_int32() % pt;
+		while(!t->operation[op] && count < LOOP_LIMIT){
+			op =  genrand_int32() % pt;
+			count++;
+		}
 
-		return op;
+		if(count == LOOP_LIMIT){
+			for(i = 0; i < TOTAL_OP_COMPOS; i++){
+				if(t->operation[i]){
+					op = i;
+					break;
+				}
+			}
+		}
+
+		return ((-1)*op - 1);
 	}
 }
 
@@ -234,13 +275,18 @@ double input_value(int in, Training t, int sample){
 
 //Retorna o valor de output de uma amostra/caso do dataset
 double output_value(Training t, int sample){
-	return t->data[sample][t->in_number];
+	double ret = t->data[sample][t->in_number];
+	printf("%lf\n", t->data[sample][t->in_number]);
+	printf("%lf\n", ret);
+	return ret;
 }
 
 //Retorna o valor da operação simples para o dado input
 double simple_value(int op, double input){
 	double (*func)(double) = op_func_simple(op);
-	return func(input);
+	double ret = func(input);
+	printf(">%lf\n", ret);
+	return ret;
 }
 
 //Retorna o valor da operação composta para o dado input

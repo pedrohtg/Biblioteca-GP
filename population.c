@@ -13,10 +13,10 @@ struct PopStruct{
 
 //Cria uma nova população com tamanho max. = size
 Population new_population(int size){
-	Population p = malloc(sizeof(struct PopStruct));
+	Population p = (Population)malloc(sizeof(struct PopStruct));
 	p->max_size = size;
 
-	Individual* arr = malloc(size * sizeof(Individual));
+	Individual* arr = (Individual*)malloc(size * sizeof(Individual));
 	p->array = arr;
 	p->size = 0;
 

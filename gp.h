@@ -5,6 +5,7 @@ typedef struct PopStruct* Population;
 typedef struct IndStruct* Individual;
 typedef struct TrainingStruct* Training;
 typedef struct GPStruct* GP;
+typedef int iterator;
 
 #define TOTAL_INT_PARAMETER_SIZE 8
 #define TOTAL_DOUBLE_PARAMETER_SIZE 2

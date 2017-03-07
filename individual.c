@@ -48,7 +48,7 @@ void random_init(Training t, Individual i, int max_height, int actual_height, it
 Individual new_individual(int max_height, Training t){
 	Heap h = new_heap(pow(2,max_height + 1) - 1);
 
-	Individual i = malloc(sizeof(struct IndStruct));
+	Individual i = (Individual)malloc(sizeof(struct IndStruct));
 	i->tree = h;
 	i->id = 0;
 	i->fitness = INF;
