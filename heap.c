@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <math.h>
 #include "heap.h"
-#include "gp.h"
 
 #define log2(a) log(a)/log(2)
 #define null -1

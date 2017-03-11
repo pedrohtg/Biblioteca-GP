@@ -275,18 +275,13 @@ double input_value(int in, Training t, int sample){
 
 //Retorna o valor de output de uma amostra/caso do dataset
 double output_value(Training t, int sample){
-	double ret = t->data[sample][t->in_number];
-	printf("%lf\n", t->data[sample][t->in_number]);
-	printf("%lf\n", ret);
-	return ret;
+	return t->data[sample][t->in_number];
 }
 
 //Retorna o valor da operação simples para o dado input
 double simple_value(int op, double input){
 	double (*func)(double) = op_func_simple(op);
-	double ret = func(input);
-	printf(">%lf\n", ret);
-	return ret;
+	return func(input);
 }
 
 //Retorna o valor da operação composta para o dado input

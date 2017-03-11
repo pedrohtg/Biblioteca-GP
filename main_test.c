@@ -2,6 +2,11 @@
 #include <stdlib.h>
 #include <math.h>
 #include "gp.h"
+#include "population.h"
+#include "individual.h"
+#include "gp.h"
+#include "training.h"
+#include "utils.h"
 
 void test_ind();
 void test_pop();
@@ -107,13 +112,13 @@ void test_tra(){
 	initialize_data("data_sets/symbolic.txt", t4);
 
 	int i, j;
-	// i = training_size(t1);
-	// printf("T1 (%d)\n",i);
-	// for(j = 0; j < i; j++){
-	// 	double a = output_value(t1,j);
-	// 	printf("%lf\n", a);
-	// 	//printf(">%lf\n", output_value(t1,j));
-	// }
+	i = training_size(t1);
+	printf("T1 (%d)\n",i);
+	for(j = 0; j < i; j++){
+		double a = output_value(t1,j);
+		printf(">%lf\n", a);
+		//printf(">%lf\n", output_value(t1,j));
+	}
 	// printf("\n--\n");
 	// i = training_size(t2);
 	// printf("T2 (%d)\n",i);
@@ -132,7 +137,7 @@ void test_tra(){
 	// for(j = 0; j < i; j++){
 	// 	printf("%lf\n", output_value(t4,j));
 	// }
-	// printf("\n--\n");
+	 printf("\n--\n");
 	
 	double r[11];
 
