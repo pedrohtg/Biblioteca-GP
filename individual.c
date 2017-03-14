@@ -8,7 +8,7 @@
 #include "training.h"
 #include "utils.h"
 
-#define INF DBL_MIN
+#define INF -DBL_MAX
 
 struct IndStruct{
 	Heap tree;

@@ -17,8 +17,8 @@ int main(){
 	
 	//test_ind();
 	// test_pop();
-	 test_tra();
-	// test_gp();
+	// test_tra();
+	 test_gp();
 
 	printf("\n\n");
 	return 0;
@@ -170,5 +170,37 @@ void test_tra(){
 }
 
 void test_gp(){
+	Training t1 = new_training(1);
+	Training t2 = new_training(1);
+	Training t3 = new_training(1);
+	Training t4 = new_training(1);
 
+	set_operations(t1, 4, '+', '*', 's', '#');
+	set_operations(t2, 3, '-', '/', '@');
+	set_operations(t3, 2, '+', 'e');
+	set_operations(t4, 3, 'c', 'l', '^');
+
+	initialize_data("data_sets/squareSequence.txt", t1);
+
+	Individual a = new_individual(4, t1);
+	Individual b = new_individual(6, t1);
+
+	int int_param[TOTAL_INT_PARAMETER_SIZE] = {100,50,5,0,0,0,0,0};
+	double double_param[TOTAL_DOUBLE_PARAMETER_SIZE] = {0.2, .05};
+
+	GP gp = new_gp(t1,int_param,double_param);
+	
+	Individual c = run_gp(gp);
+
+	print_individual(c);
+
+	delete_gp(gp);
+
+	//delete_training(t1);
+	delete_training(t2);
+	delete_training(t3);
+	delete_training(t4);
+
+	delete_individual(a);
+	delete_individual(b);
 }

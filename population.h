@@ -26,6 +26,8 @@ Individual get_individual(Population p, int id);
 //Retorna o número de individuos daquela população
 int size_population(Population p);
 
+int Msize_population(Population p);
+
 //Insere um novo individuo na População
 void insert_population(Population p, Individual i);
 

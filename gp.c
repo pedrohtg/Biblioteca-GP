@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include <time.h>
 #include <float.h>
 #include "population.h"
@@ -7,6 +8,8 @@
 #include "gp.h"
 #include "training.h"
 #include "utils.h"
+
+#define RAND_LOOP_LIMIT 333
 
 struct GPStruct{
 	Training tr;
@@ -21,7 +24,7 @@ struct GPStruct{
 	int tournament_round_size; 			// Number of individuals in a single round of tournament
 	int replace_type;					// (1 => The pop_size best individuals in the pool of parents + offspring; 1 => Selection Method in a pool of parents and offspring)
 	//Doubles
-	double crossover_probabilty;		// Percentual of population to be in crossover
+	double crossover_probability;		// Percentual of population to be in crossover
 	double mutation_probability;		// Percentual of population that can be mutated
 };	
 
@@ -44,7 +47,7 @@ GP new_gp(Training t, int integer_parameters[TOTAL_INT_PARAMETER_SIZE], double d
 	// ----------------------------------------------
 
 	// Set DOUBLE Parameters -------------------------------	
-	gp->crossover_probabilty = double_parameters[0] > 0 ? double_parameters[0] : DEFAULT_crossover_probability;				
+	gp->crossover_probability = double_parameters[0] > 0 ? double_parameters[0] : DEFAULT_crossover_probability;				
 	gp->mutation_probability = double_parameters[1] > 0 ? double_parameters[1] : DEFAULT_mutation_probability;				
 	// ----------------------------------------------
 
@@ -65,11 +68,13 @@ Individual run_gp(GP gp){
 		return;
 	}
 	int g,i,j,k;
-	int cr_size = (int)(gp->crossover_probabilty * gp->pop_size);
-	int mt_size = (int)(gp->crossover_probabilty * gp->pop_size);
+	int cr_size = (int)ceil((gp->crossover_probability * gp->pop_size));
+	int mt_size = (int)ceil((gp->mutation_probability * gp->pop_size));
 	
+	printf("Crossover size> %d\nMutation Size> %d\n", cr_size, mt_size);
+
 	int *paired = malloc(cr_size*sizeof(int));
-	int *mutated = malloc(2*cr_size*sizeof(char));
+	int *mutated = malloc(2*cr_size*sizeof(int));
 
 	Population selected, offspring;
 
@@ -78,40 +83,55 @@ Individual run_gp(GP gp){
 	for(g = 0; g < gp->number_gen; g++){
 		// init_genrand(time(NULL));
 		eval_population(gp->p, gp->tr);
-		//selection method --> TODO
-		selected = tournament(gp->p, cr_size, gp->tournament_round_size);
+		
+
+		printf("SELECTION\n\n");
+		selected = selection(gp);
+
 
 		//Crossover
 		for(k = 0; k < cr_size; k++){
 			paired[k] = -1;
-			mutated[k] = 0;
-			mutated[k + cr_size] = 0;
+			mutated[k] = -1;
+			mutated[k + cr_size] = -1;
 		}
 
+		int count = 0;
+		printf("CROSSOVER\n\n");
 		for(i = 0; i < cr_size; i++){
 			int r = genrand_int32()%cr_size;
 
-			while(r == i || paired[r] == i) r = genrand_int32()%cr_size;
-
+			while(r == i || paired[r] == i && count < RAND_LOOP_LIMIT){
+				r = genrand_int32()%cr_size;
+				count++;
+			}
 			crossover(get_individual(selected,i), get_individual(selected,r), offspring);
 			paired[i] = r;
 		}
 		// ---------------------
 
 		//Mutation
+		printf("MUTATION\n\n");
+		count = 0;
 		for(j = 0; j < mt_size; j++){
 			int r = genrand_int32()%(2*cr_size);
 
-			while(mutated[r] == 0) r = genrand_int32()%(2*cr_size);
+			while(mutated[r] == 0 && count < gp->pop_size){
+				r = genrand_int32()%(2*cr_size);
+				count++;
+			}
 
 			mutation(gp, get_individual(offspring, r));
 			mutated[r] = 0;
 		}
 
+		printf("REPLACE\n\n");
 		//Replace
 		replace(gp, offspring);
 
+		printf("CLEAR offspring\n\n");
 		clear_population(offspring);
+		printf("GO TO NEXT ITERATION\n\n");
 	}
 
 	free(paired);
@@ -138,6 +158,20 @@ void delete_gp(GP gp){
 
 
 //Selection Methods
+
+//Selection
+Population selection(GP gp){
+	int cr_size = (int)ceil((gp->crossover_probability * gp->pop_size));
+	if(gp->selection_type == 1){
+		return tournament(gp->p, cr_size, gp->tournament_round_size);
+	}
+	/*
+	else if(gp->selection_type == 2){
+		return roullete(gp->p, cr_size);
+	}
+	*/
+	else return NULL;
+}
 
 //Realiza uma seleção por torneio
 Population tournament(Population p, int rounds, int round_size){
@@ -226,15 +260,15 @@ Population select_best_pool(Population p, Population l, int n){
 	double b_fit_p, b_fit_l;
 	int i, k, get_p, get_l;
 	get_p = get_l = 1;
-
 	for(k = 0; k < n; k++){
 		if(get_p){
 			//pega best p
 			int best_id = -1;
-			double best_fit = DBL_MIN;
+			double best_fit = -DBL_MAX;
 
 			for(i = 0; i < size_p; i++){
 				double fit = get_fitness(get_individual(p,i));
+				//printf("%lf %lf << \n",DBL_MIN, fit);
 				if(fit >= best_fit && !v[i]){
 					best_id = i;
 					best_fit = fit;
@@ -261,18 +295,34 @@ Population select_best_pool(Population p, Population l, int n){
 			b_fit_l = best_fit;
 		}
 
-		if(best_l == -1 || b_fit_p > b_fit_l){
+		//printf(">>%d %d<<\n",best_p, best_l);
+
+		if(best_p != -1 && best_l != -1){
+			if(b_fit_p > b_fit_l){
+				insert_population(ret, copy_individual(get_individual(p, best_p)));
+				get_p = 1;
+				get_l = 0;
+				v[best_p] = 1;
+			}
+			else{
+				insert_population(ret, copy_individual(get_individual(l, best_l)));
+				get_p = 0;
+				get_l = 1;
+				v[best_l + size_p] = 1;
+			}
+		}
+		else if(best_l != -1){
+				insert_population(ret, copy_individual(get_individual(l, best_l)));
+				get_p = 0;
+				get_l = 1;
+				v[best_l + size_p] = 1;
+		}
+		else if(best_p != -1){
 			insert_population(ret, copy_individual(get_individual(p, best_p)));
 			get_p = 1;
 			get_l = 0;
 			v[best_p] = 1;
-		}
-		else{
-			insert_population(ret, copy_individual(get_individual(l, best_l)));
-			get_p = 0;
-			get_l = 1;
-			v[best_l + size_p] = 1;
-		}		
+		}	
 		
 	}
 

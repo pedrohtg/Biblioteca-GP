@@ -13,7 +13,7 @@ typedef int iterator;
 // Params -------------------------------------------
 
 //DEFAULT Params INT
-#define DEFAULT_number_gen						200 	// Population size(fixed max size)
+#define DEFAULT_number_gen						200 	// Total number of generations
 #define DEFAULT_pop_size						100 	// Population size(fixed max size)
 #define DEFAULT_ind_max_height					6 		// The maximum height possible for a Individual
 #define DEFAULT_mutation_type					1 		// (1 => Random change mutation_size nodes; 2 => Insert a random subtree in random node)
@@ -70,6 +70,9 @@ void delete_gp(GP gp);
 
 
 //Selection Methods ---------------------------------
+
+//Selection
+Population selection(GP gp);
 
 //Realiza uma seleção por torneio
 Population tournament(Population p, int rounds, int round_size);

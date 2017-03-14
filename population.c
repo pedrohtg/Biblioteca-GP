@@ -75,8 +75,13 @@ int size_population(Population p){
 	return p->size;
 }
 
+int Msize_population(Population p){
+	return p->max_size;
+}
+
 //Insere um novo individuo na População
 void insert_population(Population p, Individual i){
+	//printf("%d size, %d max_size\n",p->size, p->max_size);
 	if(p->size < p->max_size){
 		p->array[p->size] = i;
 		set_id(p->array[p->size], p->size);
@@ -95,6 +100,7 @@ void pop_population(Population p){
 
 //Apaga todos os individuos de uma população p
 void clear_population(Population p){
+	//printf("%d << \n", p->size);
 	int i;
 	for(i = 0; i < p->size; i++){
 		delete_individual(p->array[i]);
