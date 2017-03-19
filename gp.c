@@ -3,6 +3,7 @@
 #include <math.h>
 #include <time.h>
 #include <float.h>
+#include "heap.h"
 #include "population.h"
 #include "individual.h"
 #include "gp.h"
@@ -73,8 +74,8 @@ Individual run_gp(GP gp){
 	
 	printf("Crossover size> %d\nMutation Size> %d\n", cr_size, mt_size);
 
-	int *paired = malloc(cr_size*sizeof(int));
-	int *mutated = malloc(2*cr_size*sizeof(int));
+	int *paired = calloc(cr_size,sizeof(int));
+	int *mutated = calloc(2*cr_size,sizeof(int));
 
 	Population selected, offspring;
 
@@ -101,13 +102,15 @@ Individual run_gp(GP gp){
 		for(i = 0; i < cr_size; i++){
 			int r = genrand_int32()%cr_size;
 
-			while(r == i || paired[r] == i && count < RAND_LOOP_LIMIT){
+			while((r == i || paired[r] == i) && count < RAND_LOOP_LIMIT){
 				r = genrand_int32()%cr_size;
 				count++;
 			}
 			crossover(get_individual(selected,i), get_individual(selected,r), offspring);
 			paired[i] = r;
 		}
+
+		delete_only_population(selected);
 		// ---------------------
 
 		//Mutation
@@ -131,7 +134,7 @@ Individual run_gp(GP gp){
 
 		printf("CLEAR offspring\n\n");
 		clear_population(offspring);
-		printf("GO TO NEXT ITERATION\n\n");
+		printf("GO TO NEXT ITERATION(%d)\n\n",g+1);
 	}
 
 	free(paired);
@@ -281,7 +284,7 @@ Population select_best_pool(Population p, Population l, int n){
 		if(get_l){
 			//pega best l
 			int best_id = -1;
-			double best_fit = DBL_MIN;
+			double best_fit = -DBL_MAX;
 
 			for(i = 0; i < size_l; i++){
 				double fit = get_fitness(get_individual(l,i));
@@ -344,12 +347,22 @@ void crossover(Individual i1, Individual i2, Population offspring){
 	//Trata o caso em que os dois nos escolhidos sao as raizes do individuos,
 	//resultando em um simples swap;
 	int coin;
-	while(r1 == root_individual(k1) && r2 == root_individual(k2)){
+	int count = 0;
+	while(r1 == root_individual(k1) && r2 == root_individual(k2) && count < RAND_LOOP_LIMIT){
 		coin = rand() % 2;
 		if(coin) r1 = random_node(k1);
 		else r2 = random_node(k2);
+		count++;
 	}
 
+	if(count == RAND_LOOP_LIMIT && r1 == r2){
+		if(next(get_tree(k1),r1) != end(get_tree(k1))){
+			r1 = next(get_tree(k1), r1);
+		}
+		else if(next(get_tree(k2),r2) != end(get_tree(k2))){
+			r2 = next(get_tree(k2), r2);
+		}
+	}
 
 	swap_subtree(k1, r1, k2 ,r2);
 	insert_population(offspring,k1);

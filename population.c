@@ -108,11 +108,17 @@ void clear_population(Population p){
 	p->size = 0;
 }
 
+//Apaga apenas o vetor de ponteiros e a estrutura.
+//Individuos que são referenciados por essa população não serão apagados.
+void delete_only_population(Population p){
+	free(p->array);
+	free(p);
+}
+
 //Deleta a população p
 void delete_population(Population p){
 	clear_population(p);
-	free(p->array);
-	free(p);
+	delete_only_population(p);
 }
 
 //Fitness Function is implemented in this class

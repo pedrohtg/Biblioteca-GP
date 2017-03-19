@@ -37,6 +37,10 @@ void pop_population(Population p);
 //Apaga todos os individuos de uma população p
 void clear_population(Population p);
 
+//Apaga apenas o vetor de ponteiros e a estrutura.
+//Individuos que são referenciados por essa população não serão apagados.
+void delete_only_population(Population p);
+
 //Deleta a população p
 void delete_population(Population p);
 

@@ -218,7 +218,7 @@ void print_individual(Individual i){
 	if(!heap_empty(i->tree)){
 		printf("Notação Infixa\n");
 		print_aux(i->tree, heap_root(i->tree));
-		printf("\n\nTHIS\n");
+		printf("\n\nTree Structure\n");
 		for(x = begin(i->tree); x != end(i->tree); x = next(i->tree,x)){
 			if(height_iterator(x) > h){
 				printf("\n");

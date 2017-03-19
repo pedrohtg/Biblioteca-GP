@@ -175,12 +175,14 @@ void test_gp(){
 	Training t3 = new_training(1);
 	Training t4 = new_training(1);
 
-	set_operations(t1, 4, '+', '*', 's', '#');
+	//set_operations(t1, 4, '+', '*', 's', '#');
+	//set_operations(t1, 11, '+', '-', '*', '/', '@', '#', 's', 'c', 'e', 'l', '^');
 	set_operations(t2, 3, '-', '/', '@');
 	set_operations(t3, 2, '+', 'e');
 	set_operations(t4, 3, 'c', 'l', '^');
 
-	initialize_data("data_sets/squareSequence.txt", t1);
+	//initialize_data("data_sets/squareSequence.txt", t1);
+	initialize_data("data_sets/mackey_glass.tar/mackey-glass.txt", t1);
 
 	Individual a = new_individual(4, t1);
 	Individual b = new_individual(6, t1);
@@ -192,6 +194,7 @@ void test_gp(){
 	
 	Individual c = run_gp(gp);
 
+	printf("BEST > (%lf)\n", get_fitness(c));
 	print_individual(c);
 
 	delete_gp(gp);

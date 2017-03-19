@@ -1,0 +1,11 @@
+http://neural.cs.nthu.edu.tw/jang/benchmark/
+IEEE Neural Networks Council
+Standards Committee
+Working Group on Data Modeling Benchmarks
+
+Mackey-Glass Chaotic Time Series
+
+        *
+        * Raw dataset for tau = 17 and t = 0 to 1200. C program that generates the raw dataset
+  * Related Publication: Jan93itsmc, Chi94
+
