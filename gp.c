@@ -14,7 +14,7 @@
 
 struct GPStruct{
 	Training tr;
-	Population p;
+	Population p, offspring;
 	//GP Params list
 	int number_gen; 					// Number of generations
 	int pop_size; 						// Population size(fixed max size)
@@ -77,9 +77,9 @@ Individual run_gp(GP gp){
 	int *paired = calloc(cr_size,sizeof(int));
 	int *mutated = calloc(2*cr_size,sizeof(int));
 
-	Population selected, offspring;
+	Population selected;
 
-	offspring = new_population(2*cr_size);
+	gp->offspring = new_population(2*cr_size);
 	
 	for(g = 0; g < gp->number_gen; g++){
 		// init_genrand(time(NULL));
@@ -106,7 +106,7 @@ Individual run_gp(GP gp){
 				r = genrand_int32()%cr_size;
 				count++;
 			}
-			crossover(get_individual(selected,i), get_individual(selected,r), offspring);
+			crossover(get_individual(selected,i), get_individual(selected,r), gp->offspring);
 			paired[i] = r;
 		}
 
@@ -124,16 +124,16 @@ Individual run_gp(GP gp){
 				count++;
 			}
 
-			mutation(gp, get_individual(offspring, r));
+			mutation(gp, get_individual(gp->offspring, r));
 			mutated[r] = 0;
 		}
 
 		printf("REPLACE\n\n");
 		//Replace
-		replace(gp, offspring);
+		replace(gp, gp->offspring);
 
 		printf("CLEAR offspring\n\n");
-		clear_population(offspring);
+		clear_population(gp->offspring);
 		printf("GO TO NEXT ITERATION(%d)\n\n",g+1);
 	}
 
@@ -155,6 +155,7 @@ Individual run_gp(GP gp){
 void delete_gp(GP gp){
 	delete_training(gp->tr);
 	delete_population(gp->p);
+	delete_population(gp->offspring);
 
 	free(gp);
 }
@@ -315,10 +316,10 @@ Population select_best_pool(Population p, Population l, int n){
 			}
 		}
 		else if(best_l != -1){
-				insert_population(ret, copy_individual(get_individual(l, best_l)));
-				get_p = 0;
-				get_l = 1;
-				v[best_l + size_p] = 1;
+			insert_population(ret, copy_individual(get_individual(l, best_l)));
+			get_p = 0;
+			get_l = 1;
+			v[best_l + size_p] = 1;
 		}
 		else if(best_p != -1){
 			insert_population(ret, copy_individual(get_individual(p, best_p)));
@@ -344,11 +345,16 @@ void crossover(Individual i1, Individual i2, Population offspring){
 	iterator r1 = random_node(k1);
 	iterator r2 = random_node(k2);
 
+	int max_height = individual_max_height(k1);
+
 	//Trata o caso em que os dois nos escolhidos sao as raizes do individuos,
 	//resultando em um simples swap;
 	int coin;
 	int count = 0;
-	while(r1 == root_individual(k1) && r2 == root_individual(k2) && count < RAND_LOOP_LIMIT){
+	while(r1 == root_individual(k1) && r2 == root_individual(k2) 
+			&& subheap_height(get_tree(k1), r1) >= (max_height - height_iterator(r2))
+			&& subheap_height(get_tree(k2), r2) >= (max_height - height_iterator(r1))
+			&& count < RAND_LOOP_LIMIT){
 		coin = rand() % 2;
 		if(coin) r1 = random_node(k1);
 		else r2 = random_node(k2);
@@ -394,10 +400,10 @@ void mutation(GP gp, Individual i){
 	}
 
 	else if(gp->mutation_type == 2){
-		int new_subtree_height = 1 + (genrand_int32() % (gp->ind_max_height/2));
+		iterator chosen = random_node(i);
+		int new_subtree_height = gp->ind_max_height - height_iterator(chosen);
 		Individual sub = new_individual(new_subtree_height, gp->tr);
 
-		iterator chosen = random_node(i);
 		insert_subtree(i, get_tree(sub), chosen);
 
 		delete_individual(sub);

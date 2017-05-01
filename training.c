@@ -131,11 +131,12 @@ void initialize_data(char* filename, Training t){
 		return;
 	}
 	if(n <= 0 || m <= 0){
-		printf("Error: Insufficient number of variables and/or instances.\n");
+		printf("Error: Invalid number of variables and/or instances.\n");
 		return;
 	}
 
 	int i,j;
+	double k;
 
 	t->data_size = m;
 	t->data = (double**)malloc(m*sizeof(double*));
@@ -143,7 +144,8 @@ void initialize_data(char* filename, Training t){
 	for(i = 0; i < m; i++){
 		t->data[i] = (double*)malloc((n+1)*sizeof(double));
 		for(j = 0; j < n+1; j++){
-			fscanf(fp,"%lf", &(t->data[i][j]));
+			fscanf(fp,"%lf", &k);
+			t->data[i][j] = k;
 		}
 	}
 	
@@ -264,6 +266,7 @@ int random_variable(Training t){
 	double r =  genrand_res53();
 	int ret = (r * (t->in_number + 1)) + 1;
 	if(ret > t->in_number) ret = t->in_number;
+	if(ret < 1) ret = 1;
     return ret;
 }
 

@@ -49,6 +49,17 @@ int heap_height(Heap h){
 	return h->height;
 }
 
+//Retorna a altura da subarvore de raiz i
+int subheap_height(Heap h, iterator i){
+	if(!use(h, i)) return 0;
+	int l = use(h,left_child(h,i))  ? subheap_height(h,left_child(h,i)) : 0;
+	int r = use(h,right_child(h,i)) ? subheap_height(h,right_child(h,i)) : 0;
+
+	int m = l > r ? l : r;
+
+	return m + 1; 
+}
+
 //Aumenta o tamanho máximo do heap
 void heap_resize(Heap h, int new_capacity){
 	if(new_capacity > h->capacity){
@@ -185,21 +196,21 @@ void aux_subtree(Heap h, Heap sub, iterator h_actual, iterator sub_actual){
 	if(use(sub,right_sub)) aux_subtree(h,sub,right_child(h,h_actual),right_sub);
 }
 
-//Insere uma subtree de sub, com raiz em sub_root, no nó i do heap h
+//Insere uma subtree de s, com raiz em sub_root, no nó i do heap h
 //OBS : A subarvore de i é removida.
-void heap_insert_subtree(Heap h, Heap sub, iterator i, iterator sub_root){
+void heap_insert_subtree(Heap h, Heap s, iterator i, iterator s_root){
 	int i_height = height_iterator(i);
-	int sub_height = sub->height - height_iterator(sub_root) + 1;	
+	int s_height = subheap_height(s,s_root);	
 	int max_height = log2(h->capacity + 1) - 1;
 
-	if(i_height + sub_height - 1 > max_height){
-		heap_resize(h,pow(2, i_height + sub_height));
+	if(i_height + s_height - 1 > max_height){
+		heap_resize(h,pow(2, i_height + s_height));
 	}
 
 	heap_remove(h, i);
 
 	if(i == heap_root(h) || use(h,parent(i))){
-		aux_subtree(h, sub, i, sub_root);
+		aux_subtree(h, s, i, s_root);
 	}
 }
 
@@ -263,7 +274,7 @@ void heap_copy(Heap h, Heap g){
 	if(h->capacity != g->capacity){
 		free(g->array);
 
-		int *v = (int*)calloc(h->capacity, sizeof(int));
+		int *v = (int*)malloc(h->capacity * sizeof(int));
 		int i;
 		for(i = 0; i < h->capacity; i++){
 			v[i] = h->array[i];

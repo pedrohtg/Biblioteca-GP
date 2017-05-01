@@ -7,8 +7,8 @@
 
 struct PopStruct{
 	int max_size;
-	Individual* array;
 	int size;
+	Individual* array;	
 };
 
 //Cria uma nova população com tamanho max. = size

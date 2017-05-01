@@ -52,3 +52,5 @@ Temporary Items
 *.o
 main.exe
 
+*.137
+vgcore.126

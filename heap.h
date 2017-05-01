@@ -21,6 +21,9 @@ int heap_capacity(Heap h);
 //Retorna a altura do heap
 int heap_height(Heap h);
 
+//Retorna a altura da subarvore de raiz i
+int subheap_height(Heap h, iterator i);
+
 //Aumenta o tamanho máximo do heap
 void heap_resize(Heap h, int new_capacity);
 
@@ -69,9 +72,9 @@ int height_iterator(iterator x);
 //OBS : Sobreescreve valores já adcionados.
 void heap_insert(Heap h, int v, iterator i);
 
-//Insere uma subtree de sub, com raiz em sub_root, no nó i do heap h
+//Insere uma subtree de s, com raiz em s_root, no nó i do heap h
 //OBS : Apaga a subarvore com raiz em i, para inserir a nova 
-void heap_insert_subtree(Heap h, Heap sub, iterator i, iterator sub_root);
+void heap_insert_subtree(Heap h, Heap s, iterator i, iterator s_root);
 
 //Retorna a subtree de h com raiz r
 Heap get_subtree(Heap h, iterator r);

@@ -11,8 +11,8 @@ cp: $(BIND)
 $(BINC): $(OBJC)
 	$(CC) $(LINKOBJC) -o $(BINC) -lm
 
-debug: $(OBJCDB)
-	$(CC) -g -o $(BINC) $(LINKOBJCDB)
+debug: $(OBJC)
+	$(CC) $(LINKOBJC) -g -o $(BINC) -lm 
 
 main.o: main_test.c
 	$(CC) -c main_test.c -o main.o
